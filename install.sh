@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # Bootstrap dotfiles on Linux or macOS.
+# Homebrew is required on both platforms — installs it if missing.
 # Idempotent — safe to re-run after `git pull`.
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGES=(ghostty zellij lazygit git zsh)
+PACKAGES=(ghostty lazygit git)
+BREW_FORMULAE=(stow lazygit git-delta neovim)
+BREW_CASKS_MACOS=(ghostty font-jetbrains-mono)
 
 log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m==>\033[0m %s\n' "$*" >&2; }
@@ -17,39 +20,33 @@ detect_os() {
   esac
 }
 
-install_macos() {
-  if ! command -v brew >/dev/null 2>&1; then
-    log "Installing Homebrew"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+ensure_brew() {
+  if command -v brew >/dev/null 2>&1; then return; fi
+  log "Homebrew not found — installing"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  else
+    warn "Homebrew install did not produce a known brew path — aborting"
+    exit 1
   fi
-  log "Installing packages via brew"
-  brew install stow zellij lazygit git-delta neovim
-  brew install --cask ghostty || true
-  brew install --cask font-jetbrains-mono || true
 }
 
-install_linux() {
-  if command -v pacman >/dev/null 2>&1; then
-    log "Installing packages via pacman"
-    sudo pacman -S --needed --noconfirm stow zellij lazygit git-delta neovim ttf-jetbrains-mono
-  elif command -v apt-get >/dev/null 2>&1; then
-    log "Installing packages via apt"
-    sudo apt-get update
-    sudo apt-get install -y stow neovim fonts-jetbrains-mono
-    warn "zellij, lazygit, and delta may need manual install on apt-based systems"
-  elif command -v dnf >/dev/null 2>&1; then
-    log "Installing packages via dnf"
-    sudo dnf install -y stow zellij lazygit git-delta neovim jetbrains-mono-fonts
-  else
-    warn "Unknown Linux distro — install stow, zellij, lazygit, delta, neovim manually"
+install_packages() {
+  log "Installing packages via brew"
+  brew install "${BREW_FORMULAE[@]}"
+  if [[ "$(detect_os)" == "macos" ]]; then
+    for cask in "${BREW_CASKS_MACOS[@]}"; do
+      brew install --cask "$cask" || true
+    done
   fi
 }
 
 stow_packages() {
   log "Stowing packages into \$HOME"
   cd "$DOTFILES_DIR"
-  # Back up any conflicting plain files so stow can take over
   for pkg in "${PACKAGES[@]}"; do
     while IFS= read -r -d '' src; do
       rel="${src#"$DOTFILES_DIR/$pkg/"}"
@@ -67,13 +64,14 @@ main() {
   local os
   os="$(detect_os)"
   log "Detected OS: $os"
-  case "$os" in
-    macos) install_macos ;;
-    linux) install_linux ;;
-    *) warn "Unsupported OS: $OSTYPE — skipping package install" ;;
-  esac
+  if [[ "$os" == "unknown" ]]; then
+    warn "Unsupported OS: $OSTYPE"
+    exit 1
+  fi
+  ensure_brew
+  install_packages
   stow_packages
-  log "Done. Open a new shell to pick up changes."
+  log "Done."
 }
 
 main "$@"

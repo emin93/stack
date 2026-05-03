@@ -2,7 +2,7 @@
 
 Cross-platform terminal + dev environment config. One source of truth for Linux and macOS.
 
-Stack: [Ghostty](https://ghostty.org) · [Zellij](https://zellij.dev) · [lazygit](https://github.com/jesseduffield/lazygit) · [delta](https://github.com/dandavison/delta) · zsh · git.
+Stack: [Ghostty](https://ghostty.org) · [lazygit](https://github.com/jesseduffield/lazygit) · [delta](https://github.com/dandavison/delta) · git.
 
 ## Layout
 
@@ -10,10 +10,8 @@ Each top-level folder is a [GNU Stow](https://www.gnu.org/software/stow/) packag
 
 ```
 ghostty/    ~/.config/ghostty/config
-zellij/     ~/.config/zellij/config.kdl
 lazygit/    ~/.config/lazygit/config.yml
 git/        ~/.gitconfig
-zsh/        ~/.zshrc
 ```
 
 ## Install
@@ -24,7 +22,7 @@ cd ~/.dotfiles
 ./install.sh
 ```
 
-The script installs dependencies (Homebrew on macOS; pacman/apt/dnf on Linux), then stows every package into `$HOME`. Pre-existing real files are moved to `*.bak` so stow can replace them with symlinks.
+Homebrew is required on both platforms (the script installs it if missing). The script then `brew install`s every dependency and stows each package into `$HOME`. Pre-existing real files are moved to `*.bak` so stow can replace them with symlinks.
 
 Re-run `./install.sh` (or `stow -R *`) after pulling changes — it's idempotent.
 
@@ -33,7 +31,6 @@ Re-run `./install.sh` (or `stow -R *`) after pulling changes — it's idempotent
 Anything that legitimately differs per machine goes in gitignored local files that the main configs source:
 
 - `~/.gitconfig.local` — extra git config
-- `~/.zshrc.local` — extra shell config
 - `~/.config/ghostty/config.local` — extra Ghostty config
 
 ## Workflow

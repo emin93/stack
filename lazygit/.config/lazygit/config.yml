@@ -12,9 +12,9 @@ gui:
   showCommandLog: false
   nerdFontsVersion: "3"
 git:
-  paging:
-    colorArg: always
-    pager: delta --dark --paging=never
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never
   commit:
     signOff: false
   parseEmoji: true
