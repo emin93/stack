@@ -1,16 +1,27 @@
 font-family = "JetBrains Mono"
-font-size = 11
+font-size = 12
+font-thicken = true
 theme = "Catppuccin Mocha"
+window-colorspace = display-p3
 
 window-padding-x = 12
 window-padding-y = 12
 window-padding-balance = true
-background-opacity = 0.95
+window-save-state = always
 
-copy-on-select = clipboard
+cursor-style = bar
+cursor-style-blink = false
+
 mouse-hide-while-typing = true
+mouse-shift-capture = false
 confirm-close-surface = false
 scrollback-limit = 100000
 
+link-url = true
+clipboard-paste-protection = true
+clipboard-trim-trailing-spaces = true
+
 shell-integration = detect
 shell-integration-features = cursor,sudo,title
+
+config-file = ?~/.config/ghostty/config.local

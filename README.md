@@ -18,8 +18,10 @@ Reload inside Ghostty with `Ctrl+Shift+,`.
 
 - Theme: Catppuccin Mocha (bundled with Ghostty)
 - 12px window padding, balanced
-- 95% background opacity
-- Copy on select, hide cursor while typing
+- Bar cursor, blink off
+- Window state restored across launches
+- Hide cursor while typing, shift-click extends selection
+- Paste protection + trailing-space trim on clipboard
 - No close-surface confirmation
 - 100k line scrollback
 - Shell integration with cursor, sudo, and title features
