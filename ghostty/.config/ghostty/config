@@ -17,7 +17,7 @@ cursor-style-blink = false
 mouse-hide-while-typing = true
 mouse-shift-capture = false
 confirm-close-surface = false
-scrollback-limit = 100000
+scrollback-limit = 104857600
 
 link-url = true
 clipboard-paste-protection = true
