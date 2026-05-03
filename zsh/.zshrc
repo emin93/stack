@@ -26,15 +26,6 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
-# nvm (Linux: ~/.nvm; macOS via brew: $(brew --prefix)/opt/nvm)
-export NVM_DIR="$HOME/.nvm"
-if [[ -s "$NVM_DIR/nvm.sh" ]]; then
-  . "$NVM_DIR/nvm.sh"
-  [[ -s "$NVM_DIR/bash_completion" ]] && . "$NVM_DIR/bash_completion"
-elif command -v brew >/dev/null 2>&1 && [[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ]]; then
-  . "$(brew --prefix)/opt/nvm/nvm.sh"
-fi
-
 # Android SDK (Linux only — macOS uses different path, set in ~/.zshrc.local if needed)
 if [[ "$OSTYPE" == "linux"* && -d "$HOME/Android/Sdk" ]]; then
   export ANDROID_HOME="$HOME/Android/Sdk"
@@ -71,7 +62,7 @@ bindkey -e
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
 
-# Node (keg-only Homebrew node@24 on macOS; system node elsewhere)
+# Node (keg-only Homebrew node@24 on macOS and Linuxbrew)
 if command -v brew >/dev/null 2>&1; then
   _node_prefix="$(brew --prefix node@24 2>/dev/null)"
   [[ -n "$_node_prefix" && -d "$_node_prefix/bin" ]] && export PATH="$_node_prefix/bin:$PATH"
