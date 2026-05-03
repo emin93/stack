@@ -15,8 +15,12 @@ export LESS="-R"
 # Local bin dirs
 export PATH="$HOME/.local/bin:$PATH"
 
-# pnpm
-export PNPM_HOME="$HOME/.local/share/pnpm"
+# pnpm (macOS uses ~/Library/pnpm, Linux uses ~/.local/share/pnpm)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="$HOME/.local/share/pnpm"
+fi
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -66,6 +70,13 @@ alias cc='claude'
 bindkey -e
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
+
+# Node (keg-only Homebrew node@24 on macOS; system node elsewhere)
+if command -v brew >/dev/null 2>&1; then
+  _node_prefix="$(brew --prefix node@24 2>/dev/null)"
+  [[ -n "$_node_prefix" && -d "$_node_prefix/bin" ]] && export PATH="$_node_prefix/bin:$PATH"
+  unset _node_prefix
+fi
 
 # Per-host overrides (secrets, machine-specific tweaks)
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

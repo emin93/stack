@@ -15,6 +15,7 @@
 | 🐙 [gh](https://cli.github.com) | GitHub CLI |
 | 🎬 [ffmpeg](https://ffmpeg.org) | Audio/video processing |
 | ✏️ [micro](https://micro-editor.github.io) | Modeless terminal editor |
+| 🟢 [node@24](https://nodejs.org) | JavaScript runtime (pnpm via Corepack) |
 
 ## 📂 Layout
 
@@ -34,13 +35,20 @@ zsh/        ~/.zshrc
 [Homebrew](https://brew.sh) is required.
 
 ```bash
-brew install stow lazygit git-delta micro ripgrep fd gh ffmpeg
+brew install stow lazygit git-delta micro ripgrep fd gh ffmpeg node@24
 ```
 
 🍎 macOS only — also install the font:
 
 ```bash
 brew install --cask font-jetbrains-mono
+```
+
+`node@24` is keg-only; the zshrc puts it on `PATH` automatically. Enable Corepack-managed pnpm once:
+
+```bash
+corepack enable
+corepack prepare pnpm@latest --activate
 ```
 
 ### 2. Stow each package
