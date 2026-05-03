@@ -26,7 +26,7 @@
 
 [core]
 	pager = delta
-	editor = nvim
+	editor = micro
 
 [interactive]
 	diffFilter = delta --color-only
@@ -36,7 +36,7 @@
 	light = false
 	line-numbers = true
 	side-by-side = false
-	syntax-theme = Catppuccin-mocha
+	syntax-theme = Catppuccin Mocha
 
 [alias]
 	st = status -sb

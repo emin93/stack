@@ -1,10 +1,22 @@
-# dotfiles
+# 🛠️ dotfiles
 
-Cross-platform terminal + dev environment config. One source of truth for Linux and macOS.
+> Cross-platform terminal + dev environment config. One source of truth for Linux 🐧 and macOS 🍎.
 
-Stack: [Ghostty](https://ghostty.org) · [lazygit](https://github.com/jesseduffield/lazygit) · [delta](https://github.com/dandavison/delta) · git.
+## ✨ Stack
 
-## Layout
+| Tool | What it does |
+| --- | --- |
+| 👻 [Ghostty](https://ghostty.org) | Terminal emulator |
+| 🐚 [zsh](https://www.zsh.org) | Shell |
+| 🦎 [lazygit](https://github.com/jesseduffield/lazygit) | Terminal UI for git |
+| 🎨 [delta](https://github.com/dandavison/delta) | Syntax-highlighted git diffs |
+| 🔍 [ripgrep](https://github.com/BurntSushi/ripgrep) | Fast recursive search |
+| 📁 [fd](https://github.com/sharkdp/fd) | Fast file finder |
+| 🐙 [gh](https://cli.github.com) | GitHub CLI |
+| 🎬 [ffmpeg](https://ffmpeg.org) | Audio/video processing |
+| ✏️ [micro](https://micro-editor.github.io) | Modeless terminal editor |
+
+## 📂 Layout
 
 Each top-level folder is a [GNU Stow](https://www.gnu.org/software/stow/) package. Its internal structure mirrors `$HOME`, so `stow ghostty` symlinks `ghostty/.config/ghostty/config` to `~/.config/ghostty/config`.
 
@@ -12,27 +24,51 @@ Each top-level folder is a [GNU Stow](https://www.gnu.org/software/stow/) packag
 ghostty/    ~/.config/ghostty/config
 lazygit/    ~/.config/lazygit/config.yml
 git/        ~/.gitconfig
+zsh/        ~/.zshrc
 ```
 
-## Install
+## 🚀 Install
+
+### 1. Install dependencies
+
+[Homebrew](https://brew.sh) is required.
 
 ```bash
-git clone git@github.com:emin93/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
-./install.sh
+brew install stow lazygit git-delta micro ripgrep fd gh ffmpeg
 ```
 
-Homebrew is required on both platforms (the script installs it if missing). The script then `brew install`s every dependency and stows each package into `$HOME`. Pre-existing real files are moved to `*.bak` so stow can replace them with symlinks.
+🍎 macOS only — also install the font:
 
-Re-run `./install.sh` (or `stow -R *`) after pulling changes — it's idempotent.
+```bash
+brew install --cask font-jetbrains-mono
+```
 
-## Per-host overrides
+### 2. Stow each package
+
+```bash
+stow --target="$HOME" ghostty lazygit git zsh
+```
+
+### 🔄 After pulling changes
+
+```bash
+git pull
+stow --target="$HOME" --restow ghostty lazygit git zsh   # only if a package was added
+brew install <new-tool>                                  # only if README lists a new dep
+```
+
+Symlinked configs apply immediately — no restow needed for edits to existing files. ✅
+
+## 🔐 Per-host overrides
 
 Anything that legitimately differs per machine goes in gitignored local files that the main configs source:
 
-- `~/.gitconfig.local` — extra git config
-- `~/.config/ghostty/config.local` — extra Ghostty config
+| File | Purpose |
+| --- | --- |
+| `~/.gitconfig.local` | Extra git config |
+| `~/.config/ghostty/config.local` | Extra Ghostty config |
+| `~/.zshrc.local` | Secrets and per-host shell config |
 
-## Workflow
+## 🔁 Workflow
 
-Edit a config on either machine → commit → push → on the other machine `git pull` (configs are symlinks, so changes apply immediately; reload the relevant tool).
+Edit a config on either machine → `git commit` → `git push` → on the other machine `git pull`. Configs are symlinks, so changes apply immediately — just reload the relevant tool. 🎉
