@@ -53,10 +53,7 @@ fi
 
 # Aliases
 alias ls='ls --color=auto'
-alias ll='ls -lah'
-alias lg='lazygit'
-alias g='git'
-alias cc='claude'
+alias claude='claude --permission-mode bypassPermissions'
 
 # Key bindings — arrow keys do prefix-based history search
 bind '"\e[A": history-search-backward' 2>/dev/null

@@ -31,10 +31,7 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 # Aliases
 alias ls='ls -G'
-alias ll='ls -lah'
-alias lg='lazygit'
-alias g='git'
-alias cc='claude'
+alias claude='claude --permission-mode bypassPermissions'
 
 # Key bindings
 bindkey -e
