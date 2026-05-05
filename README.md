@@ -7,7 +7,7 @@
 | Tool | What it does |
 | --- | --- |
 | 👻 [Ghostty](https://ghostty.org) | Terminal emulator |
-| 🐚 [zsh](https://www.zsh.org) | Shell |
+| 🐚 [zsh](https://www.zsh.org) / [bash](https://www.gnu.org/software/bash/) | Shell — zsh on macOS, bash on SteamOS |
 | 🦎 [lazygit](https://github.com/jesseduffield/lazygit) | Terminal UI for git |
 | 🎨 [delta](https://github.com/dandavison/delta) | Syntax-highlighted git diffs |
 | 🔍 [ripgrep](https://github.com/BurntSushi/ripgrep) | Fast recursive search |
@@ -25,7 +25,8 @@ Each top-level folder is a [GNU Stow](https://www.gnu.org/software/stow/) packag
 ghostty/    ~/.config/ghostty/config
 lazygit/    ~/.config/lazygit/config.yml
 git/        ~/.gitconfig
-zsh/        ~/.zshrc
+zsh/        ~/.zshrc      (macOS)
+bash/       ~/.bashrc     (SteamOS)
 ```
 
 ## 🚀 Install
@@ -44,7 +45,7 @@ brew install stow lazygit git-delta micro ripgrep fd gh ffmpeg node@24
 brew install --cask font-jetbrains-mono
 ```
 
-`node@24` is keg-only; the zshrc puts it on `PATH` automatically. Enable Corepack-managed pnpm once:
+`node@24` is keg-only; the shell rc puts it on `PATH` automatically. Enable Corepack-managed pnpm once:
 
 ```bash
 corepack enable
@@ -53,15 +54,25 @@ corepack prepare pnpm@latest --activate
 
 ### 2. Stow each package
 
+🍎 macOS:
+
 ```bash
 stow --target="$HOME" ghostty lazygit git zsh
+```
+
+🐧 SteamOS (and other Linux):
+
+```bash
+rm ~/.bashrc                                             # if a non-stowed one exists
+stow --target="$HOME" ghostty lazygit git bash
 ```
 
 ### 🔄 After pulling changes
 
 ```bash
 git pull
-stow --target="$HOME" --restow ghostty lazygit git zsh   # only if a package was added
+stow --target="$HOME" --restow ghostty lazygit git zsh   # macOS — only if a package was added
+stow --target="$HOME" --restow ghostty lazygit git bash  # SteamOS — only if a package was added
 brew install <new-tool>                                  # only if README lists a new dep
 ```
 
@@ -75,7 +86,7 @@ Anything that legitimately differs per machine goes in gitignored local files th
 | --- | --- |
 | `~/.gitconfig.local` | Extra git config |
 | `~/.config/ghostty/config.local` | Extra Ghostty config |
-| `~/.zshrc.local` | Secrets and per-host shell config |
+| `~/.zshrc.local` / `~/.bashrc.local` | Secrets and per-host shell config |
 
 ## 🔁 Workflow
 
