@@ -1,11 +1,7 @@
-# Portable zshrc — sourced on both Linux and macOS.
+# macOS zshrc.
 
-# Homebrew (macOS or Linuxbrew)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [[ -d /home/linuxbrew/.linuxbrew ]]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
+# Homebrew
+[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
 export EDITOR="micro"
 export VISUAL="$EDITOR"
@@ -15,29 +11,12 @@ export LESS="-R"
 # Local bin dirs
 export PATH="$HOME/.local/bin:$PATH"
 
-# pnpm (macOS uses ~/Library/pnpm, Linux uses ~/.local/share/pnpm)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  export PNPM_HOME="$HOME/Library/pnpm"
-else
-  export PNPM_HOME="$HOME/.local/share/pnpm"
-fi
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
-
-# Android SDK (Linux only — macOS uses different path, set in ~/.zshrc.local if needed)
-if [[ "$OSTYPE" == "linux"* && -d "$HOME/Android/Sdk" ]]; then
-  export ANDROID_HOME="$HOME/Android/Sdk"
-  export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
-  for jbr in /var/lib/flatpak/app/com.google.AndroidStudio/*/stable/*/files/extra/jbr; do
-    if [[ -x "$jbr/bin/java" ]]; then
-      export JAVA_HOME="$jbr"
-      export PATH="$JAVA_HOME/bin:$PATH"
-      break
-    fi
-  done
-fi
 
 # History
 HISTFILE="$HOME/.zsh_history"
@@ -51,7 +30,7 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 # Aliases
-alias ls='ls --color=auto' 2>/dev/null || alias ls='ls -G'
+alias ls='ls -G'
 alias ll='ls -lah'
 alias lg='lazygit'
 alias g='git'
@@ -62,7 +41,7 @@ bindkey -e
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
 
-# Node (keg-only Homebrew node@24 on macOS and Linuxbrew)
+# Node (keg-only Homebrew node@24)
 if command -v brew >/dev/null 2>&1; then
   _node_prefix="$(brew --prefix node@24 2>/dev/null)"
   [[ -n "$_node_prefix" && -d "$_node_prefix/bin" ]] && export PATH="$_node_prefix/bin:$PATH"

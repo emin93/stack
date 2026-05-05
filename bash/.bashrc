@@ -1,14 +1,10 @@
-# Portable bashrc — used on SteamOS (Linux). macOS uses zsh.
+# SteamOS / Linux bashrc.
 
 # Bail out for non-interactive shells (scp, etc.)
 [[ $- != *i* ]] && return
 
-# Homebrew (macOS or Linuxbrew)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [[ -d /home/linuxbrew/.linuxbrew ]]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
+# Homebrew (Linuxbrew)
+[[ -d /home/linuxbrew/.linuxbrew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 export EDITOR="micro"
 export VISUAL="$EDITOR"
@@ -19,18 +15,14 @@ export LESS="-R"
 export PATH="$HOME/.local/bin:$PATH"
 
 # pnpm
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  export PNPM_HOME="$HOME/Library/pnpm"
-else
-  export PNPM_HOME="$HOME/.local/share/pnpm"
-fi
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
-# Android SDK (Linux only)
-if [[ "$OSTYPE" == "linux"* && -d "$HOME/Android/Sdk" ]]; then
+# Android SDK
+if [[ -d "$HOME/Android/Sdk" ]]; then
   export ANDROID_HOME="$HOME/Android/Sdk"
   export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
   for jbr in /var/lib/flatpak/app/com.google.AndroidStudio/*/stable/*/files/extra/jbr; do
@@ -60,7 +52,7 @@ elif [[ -r /etc/bash_completion ]]; then
 fi
 
 # Aliases
-alias ls='ls --color=auto' 2>/dev/null || alias ls='ls -G'
+alias ls='ls --color=auto'
 alias ll='ls -lah'
 alias lg='lazygit'
 alias g='git'
