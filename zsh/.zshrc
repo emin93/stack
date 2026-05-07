@@ -32,7 +32,7 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 # Aliases
 alias ls='ls -G'
 alias claude='claude --permission-mode bypassPermissions'
-alias codex='codex --dangerously-bypass-approvals-and-sandbox'
+alias codex='codex --yolo'
 
 # Key bindings
 bindkey -e
