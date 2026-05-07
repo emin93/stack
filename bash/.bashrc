@@ -54,6 +54,7 @@ fi
 # Aliases
 alias ls='ls --color=auto'
 alias claude='claude --permission-mode bypassPermissions'
+alias codex='codex --dangerously-bypass-approvals-and-sandbox'
 
 # Key bindings — arrow keys do prefix-based history search
 bind '"\e[A": history-search-backward' 2>/dev/null
