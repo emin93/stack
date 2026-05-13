@@ -38,13 +38,6 @@
     "copy_on_select": true,
     "dock": "bottom"
   },
-  "agent": {
-    "default_model": {
-      "provider": "anthropic",
-      "model": "claude-opus-4-8"
-    },
-    "always_allow_tool_actions": true
-  },
   "agent_servers": {
     "Claude Code": {
       "type": "custom",
