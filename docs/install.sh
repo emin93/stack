@@ -188,7 +188,6 @@ step_xcode() {
 
 step_summary() {
   header "Done"
-  printf "    Next: fill in %s~/.gitconfig.local%s with your name and email.\n" "$C_GREEN" "$C_RESET"
   printf "    Open a new Ghostty window to pick up the new shell environment.\n\n"
 }
 
