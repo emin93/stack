@@ -25,18 +25,7 @@
 	conflictStyle = zdiff3
 
 [core]
-	pager = delta
-	editor = micro
-
-[interactive]
-	diffFilter = delta --color-only
-
-[delta]
-	navigate = true
-	light = false
-	line-numbers = true
-	side-by-side = false
-	syntax-theme = Catppuccin Mocha
+	editor = nano
 
 [alias]
 	st = status -sb
