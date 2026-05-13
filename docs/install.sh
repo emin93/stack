@@ -296,15 +296,20 @@ PY
 
 step_xcode() {
   step "Xcode (latest)"
-  if ! command -v xcodes >/dev/null 2>&1; then
-    warn "xcodes not installed (expected from Brewfile); skipping."
+  if ! command -v mas >/dev/null 2>&1; then
+    warn "mas not installed (expected from Brewfile); skipping."
     return
   fi
-  if ! xcodes install --latest --select; then
-    warn "xcodes install failed (Apple ID not signed in?); re-run when ready."
+  if mas list 2>/dev/null | awk '{print $1}' | grep -qx 497799835; then
+    ok "already installed via App Store."
+  elif ! mas install 497799835; then
+    warn "mas install failed (signed in to the App Store?); re-run when ready."
     return
   fi
-  ok "Xcode installed and selected."
+  if [[ -d /Applications/Xcode.app ]]; then
+    sudo xcode-select -s /Applications/Xcode.app
+    ok "Xcode installed and selected."
+  fi
 }
 
 step_summary() {
