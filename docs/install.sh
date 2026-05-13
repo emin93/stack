@@ -176,11 +176,18 @@ step_1password_ssh() {
     return
   fi
 
-  if gh ssh-key list 2>/dev/null | grep -Fq "$pubkey"; then
-    ok "1Password public key already on GitHub."
+  local title="$(hostname)"
+  if gh api /user/keys --jq '.[].key' 2>/dev/null | grep -Fxq "$pubkey"; then
+    ok "1Password key already on GitHub (auth)."
   else
-    printf '%s\n' "$pubkey" | gh ssh-key add - --title "$(hostname)" --type authentication
-    ok "uploaded 1Password public key to GitHub."
+    printf '%s\n' "$pubkey" | gh ssh-key add - --title "$title" --type authentication
+    ok "uploaded 1Password key to GitHub (auth)."
+  fi
+  if gh api /user/ssh_signing_keys --jq '.[].key' 2>/dev/null | grep -Fxq "$pubkey"; then
+    ok "1Password key already on GitHub (signing)."
+  else
+    printf '%s\n' "$pubkey" | gh ssh-key add - --title "$title" --type signing
+    ok "uploaded 1Password key to GitHub (signing)."
   fi
 }
 

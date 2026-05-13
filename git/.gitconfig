@@ -1,6 +1,7 @@
 [user]
 	name = Emin Khateeb
 	email = emin@emin.ch
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMV1jrACzdtAuWqdCrmo5A3gr6yE7I77FR4G+wZ5yKHU
 
 [init]
 	defaultBranch = main
@@ -36,3 +37,9 @@
 
 [include]
 	path = ~/.gitconfig.local
+[gpg]
+	format = ssh
+[gpg "ssh"]
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+[commit]
+	gpgsign = true

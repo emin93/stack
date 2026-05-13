@@ -7,6 +7,9 @@ export EDITOR="zed --wait"
 export VISUAL="$EDITOR"
 export LESS="-R"
 
+# Route all SSH agent traffic through 1Password.
+export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+
 # Local bin dirs
 export PATH="$HOME/.local/bin:$PATH"
 
