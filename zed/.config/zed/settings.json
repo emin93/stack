@@ -7,7 +7,7 @@
       "type": "custom"
     },
     "Codex": {
-      "args": ["--yolo"],
+      "args": ["-c", "approval_policy=\"never\"", "-c", "sandbox_mode=\"danger-full-access\""],
       "command": "codex-acp",
       "env": {},
       "type": "custom"
