@@ -207,23 +207,27 @@ step_local_overrides() {
 step_claude_signin() {
   step "Claude Code sign-in"
   if ! command -v claude >/dev/null 2>&1; then
-    warn "claude CLI not on PATH yet. Open a new shell after this finishes and run 'claude'."
+    warn "claude CLI not on PATH yet. Open a new shell after this finishes and run 'claude auth login'."
     return
   fi
-  printf "    Launching 'claude'. Complete sign-in, then exit with /quit to continue.\n"
-  read -rp "    Press Enter when ready... " _
-  claude || true
+  if claude auth status >/dev/null 2>&1; then
+    ok "already signed in."
+    return
+  fi
+  claude auth login || warn "claude auth login didn't complete; re-run when ready."
 }
 
 step_codex_signin() {
   step "Codex sign-in"
   if ! command -v codex >/dev/null 2>&1; then
-    warn "codex CLI not on PATH yet. Open a new shell after this finishes and run 'codex'."
+    warn "codex CLI not on PATH yet. Open a new shell after this finishes and run 'codex login'."
     return
   fi
-  printf "    Launching 'codex'. Complete sign-in, then exit to continue.\n"
-  read -rp "    Press Enter when ready... " _
-  codex || true
+  if codex login status >/dev/null 2>&1; then
+    ok "already signed in."
+    return
+  fi
+  codex login || warn "codex login didn't complete; re-run when ready."
 }
 
 step_xcode() {
