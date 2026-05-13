@@ -1,7 +1,12 @@
 {
   "auto_install_extensions": {
     "catppuccin": true,
-    "catppuccin-icons": true
+    "catppuccin-icons": true,
+    "swift": true,
+    "astro": true,
+    "kotlin": true,
+    "mdx": true,
+    "toml": true
   },
   "theme": {
     "mode": "system",
