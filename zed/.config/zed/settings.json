@@ -1,7 +1,7 @@
 {
   "agent_servers": {
     "Claude Code": {
-      "args": ["dlx", "@zed-industries/claude-code-acp"],
+      "args": ["dlx", "@agentclientprotocol/claude-agent-acp"],
       "command": "pnpm",
       "env": {},
       "type": "custom"
