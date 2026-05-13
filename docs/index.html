@@ -3,172 +3,488 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>install.emin.ch — fresh Mac setup</title>
-<meta name="description" content="One command to provision a fresh Apple Silicon Mac: Homebrew, dev tools, dotfiles, Xcode.">
+<title>install.emin.ch — fresh Mac in one command</title>
+<meta name="description" content="One command to provision a fresh Apple Silicon Mac: Homebrew, dotfiles, Xcode, AI dev CLIs.">
+<meta property="og:title" content="install.emin.ch">
+<meta property="og:description" content="One command to provision a fresh Apple Silicon Mac.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://install.emin.ch">
+<meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f59e0b'/%3E%3Ctext x='16' y='22' font-family='ui-monospace,monospace' font-size='18' font-weight='700' text-anchor='middle' fill='%230a0a0b'%3E%26gt;%3C/text%3E%3C/svg%3E">
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #fafafa;
-    --fg: #18181b;
-    --muted: #71717a;
-    --accent: #2563eb;
-    --code-bg: #18181b;
-    --code-fg: #fafafa;
-    --border: #e4e4e7;
+    --bg: #fafaf9;
+    --bg-elevated: #ffffff;
+    --bg-terminal: #1c1917;
+    --fg: #0c0a09;
+    --fg-secondary: #57534e;
+    --fg-tertiary: #a8a29e;
+    --accent: #d97706;
+    --accent-fg: #ffffff;
+    --success: #16a34a;
+    --border: #e7e5e4;
+    --border-strong: #d6d3d1;
+    --grid-dot: rgba(0, 0, 0, 0.06);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #09090b;
-      --fg: #fafafa;
-      --muted: #a1a1aa;
-      --accent: #60a5fa;
-      --code-bg: #18181b;
-      --code-fg: #fafafa;
+      --bg: #0a0a0b;
+      --bg-elevated: #131316;
+      --bg-terminal: #000000;
+      --fg: #fafaf9;
+      --fg-secondary: #a8a29e;
+      --fg-tertiary: #57534e;
+      --accent: #f59e0b;
+      --accent-fg: #0a0a0b;
+      --success: #4ade80;
       --border: #27272a;
+      --border-strong: #3f3f46;
+      --grid-dot: rgba(255, 255, 255, 0.05);
     }
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
   body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
     background: var(--bg);
     color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+    min-height: 100vh;
+    background-image: radial-gradient(circle, var(--grid-dot) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0;
   }
+  code, pre, .mono {
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    font-feature-settings: "ss01", "ss02", "cv11";
+  }
+
   main {
-    max-width: 720px;
+    max-width: 760px;
     margin: 0 auto;
-    padding: 64px 24px 96px;
+    padding: clamp(48px, 8vw, 96px) 24px 96px;
+  }
+
+  /* hero */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-secondary);
+    margin-bottom: 24px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-elevated);
+  }
+  .eyebrow .dot {
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
   }
   h1 {
-    font-size: 2rem;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
     font-weight: 700;
-    letter-spacing: -0.02em;
-    margin: 0 0 8px;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  h1 .domain {
+    color: var(--fg-secondary);
+    font-weight: 500;
   }
   .tagline {
-    color: var(--muted);
-    font-size: 1.05rem;
-    margin: 0 0 40px;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    color: var(--fg-secondary);
+    max-width: 540px;
+    margin-bottom: 40px;
   }
-  h2 {
-    font-size: 1.15rem;
-    font-weight: 600;
-    margin: 40px 0 12px;
+
+  /* terminal */
+  .terminal {
+    background: var(--bg-terminal);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.04) inset,
+      0 24px 48px -16px rgba(0, 0, 0, 0.4),
+      0 0 0 1px var(--border);
+    margin-bottom: 16px;
   }
-  p { margin: 0 0 16px; }
-  ul {
-    padding-left: 20px;
-    margin: 0 0 16px;
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
-  li { margin-bottom: 4px; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  code, pre {
-    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  .light {
+    width: 12px; height: 12px;
+    border-radius: 999px;
   }
-  .command {
+  .light.r { background: #ff5f57; }
+  .light.y { background: #febc2e; }
+  .light.g { background: #28c840; }
+  .terminal-title {
+    margin-left: 12px;
+    font-size: 0.8rem;
+    color: #71717a;
+    font-family: inherit;
+  }
+  .terminal-body {
     position: relative;
-    background: var(--code-bg);
-    color: var(--code-fg);
-    border-radius: 10px;
-    padding: 20px 64px 20px 20px;
-    font-size: 0.92rem;
-    overflow-x: auto;
+    padding: 24px;
+    color: #fafaf9;
+  }
+  .prompt {
+    color: var(--accent);
+    user-select: none;
+  }
+  #cmd-text {
+    font-size: clamp(0.82rem, 1.6vw, 0.95rem);
     white-space: pre;
+    overflow-x: auto;
+    display: block;
+    padding-bottom: 4px;
+  }
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 1.1s steps(2) infinite;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
   }
   .copy-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--code-fg);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.8rem;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fafaf9;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
     font-family: inherit;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .copy-btn:hover { background: rgba(255, 255, 255, 0.15); }
-  .copy-btn.copied { background: #16a34a; border-color: #16a34a; }
-  .muted-block {
-    color: var(--muted);
+  .copy-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  .copy-btn:active { transform: translateY(1px); }
+  .copy-btn.copied {
+    background: var(--success);
+    color: #0a0a0b;
+    border-color: var(--success);
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 64px;
+  }
+  .badge {
+    font-size: 0.78rem;
+    color: var(--fg-secondary);
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-elevated);
+  }
+
+  /* sections */
+  section { margin-top: 56px; }
+  h2 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--fg-tertiary);
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  /* install groups */
+  .groups {
+    display: grid;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .group {
+    background: var(--bg-elevated);
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 24px;
+    align-items: baseline;
+  }
+  @media (max-width: 560px) {
+    .group {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+  .group-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .group-items {
     font-size: 0.92rem;
-    border-left: 2px solid var(--border);
-    padding-left: 16px;
-    margin: 24px 0;
+    color: var(--fg-secondary);
   }
+  .group-items code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-size: 0.85em;
+    color: var(--fg);
+  }
+
+  /* steps */
+  ol.steps {
+    list-style: none;
+    counter-reset: step;
+    display: grid;
+    gap: 10px;
+  }
+  ol.steps li {
+    counter-increment: step;
+    padding: 14px 20px 14px 56px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    font-size: 0.94rem;
+    position: relative;
+  }
+  ol.steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute;
+    left: 20px;
+    top: 14px;
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  ol.steps strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+  ol.steps em {
+    font-style: normal;
+    color: var(--fg-tertiary);
+    font-size: 0.86rem;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* manual followups */
+  .followups {
+    border-left: 3px solid var(--accent);
+    background: var(--bg-elevated);
+    padding: 16px 20px;
+    border-radius: 0 10px 10px 0;
+    font-size: 0.92rem;
+  }
+  .followups strong { color: var(--fg); }
+  .followups ul {
+    list-style: none;
+    margin-top: 8px;
+  }
+  .followups li {
+    padding-left: 20px;
+    position: relative;
+    color: var(--fg-secondary);
+    margin-top: 4px;
+  }
+  .followups li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+  .followups code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-size: 0.85em;
+    color: var(--fg);
+  }
+
+  /* footer */
   footer {
-    margin-top: 64px;
-    padding-top: 24px;
+    margin-top: 96px;
+    padding-top: 32px;
     border-top: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 0.88rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.86rem;
+    color: var(--fg-tertiary);
+  }
+  footer a {
+    color: var(--fg-secondary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  footer a:hover { color: var(--accent); }
+  footer .links {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-fg);
   }
 </style>
 </head>
 <body>
 <main>
-  <h1>install.emin.ch</h1>
-  <p class="tagline">One command to provision a fresh Apple Silicon Mac.</p>
+  <span class="eyebrow"><span class="dot"></span>fresh mac setup</span>
 
-  <div class="command">
-    <button class="copy-btn" id="copy-btn" type="button">Copy</button><span id="cmd">bash -c "$(curl -fsSL https://install.emin.ch/install.sh)"</span>
+  <h1>install<span class="domain">.emin.ch</span></h1>
+  <p class="tagline">A single command turns a freshly unboxed Apple Silicon Mac into a working dev environment. Safe to re-run on any existing setup.</p>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <span class="light r"></span>
+      <span class="light y"></span>
+      <span class="light g"></span>
+      <span class="terminal-title">~/  —  zsh</span>
+    </div>
+    <div class="terminal-body">
+      <button class="copy-btn" id="copy-btn" type="button" aria-label="Copy command">
+        <span id="copy-label">Copy</span>
+      </button>
+      <code id="cmd-text"><span class="prompt">$ </span>bash -c "$(curl -fsSL https://install.emin.ch/install.sh)"<span class="cursor"></span></code>
+    </div>
   </div>
 
-  <p class="muted-block">
-    Paste into Terminal on a fresh Mac. You'll be guided through every sign-in
-    (GitHub, Claude Code, Codex, Apple ID). The same command on an existing
-    setup is safe — it adds missing pieces and bumps versions.
-  </p>
+  <div class="badges">
+    <span class="badge">Apple Silicon</span>
+    <span class="badge">Idempotent</span>
+    <span class="badge">~30 min unattended</span>
+    <span class="badge">No npm-pipe-bash sketchiness</span>
+  </div>
 
-  <h2>What gets installed</h2>
-  <ul>
-    <li>Xcode Command Line Tools + latest Xcode (via <a href="https://github.com/XcodesOrg/xcodes">xcodes</a>)</li>
-    <li>Homebrew, then everything in the <a href="https://github.com/emin93/install/blob/main/Brewfile">Brewfile</a>: ripgrep, fd, gh, ffmpeg, mise, stow, aria2, JetBrains Mono</li>
-    <li>Casks: Ghostty, 1Password, Brave, Claude Code, Codex</li>
-    <li><a href="https://mise.jdx.dev">mise</a> with global Node LTS and latest pnpm</li>
-    <li>Dotfiles symlinked via <code>stow</code>: zsh, git, Ghostty</li>
-    <li>A new ed25519 SSH key, uploaded to your GitHub account</li>
-  </ul>
+  <section>
+    <h2>What you get</h2>
+    <div class="groups">
+      <div class="group">
+        <div class="group-name">CLI tools</div>
+        <div class="group-items"><code>ripgrep</code> <code>fd</code> <code>gh</code> <code>stow</code> <code>ffmpeg</code> <code>mise</code> <code>xcodes</code> <code>aria2</code></div>
+      </div>
+      <div class="group">
+        <div class="group-name">Apps</div>
+        <div class="group-items">Ghostty · 1Password · Brave · Claude Code · Codex</div>
+      </div>
+      <div class="group">
+        <div class="group-name">Runtimes</div>
+        <div class="group-items">Node LTS and pnpm latest via <code>mise</code>, swappable per-project with <code>mise.toml</code></div>
+      </div>
+      <div class="group">
+        <div class="group-name">Dotfiles</div>
+        <div class="group-items">zsh, git, and Ghostty configs symlinked from <code>~/Documents/Projects/install</code> via <code>stow</code></div>
+      </div>
+      <div class="group">
+        <div class="group-name">Auth</div>
+        <div class="group-items">GitHub (<code>gh</code> + new ed25519 SSH key, uploaded for you), Claude, Codex, Apple ID for Xcode — all walked through interactively</div>
+      </div>
+      <div class="group">
+        <div class="group-name">Xcode</div>
+        <div class="group-items">Command Line Tools + latest Xcode, installed via <code>xcodes</code> (the slow one — run it overnight)</div>
+      </div>
+    </div>
+  </section>
 
-  <h2>What you still do by hand</h2>
-  <ul>
-    <li>Fill in <code>~/.gitconfig.local</code> with your name and email</li>
-    <li>Sign in to apps with GUI-only auth (1Password, Brave)</li>
-  </ul>
+  <section>
+    <h2>Inside the script</h2>
+    <ol class="steps">
+      <li><strong>Sanity check.</strong> <em>macOS, Apple Silicon, not root, not truncated.</em></li>
+      <li><strong>Xcode Command Line Tools.</strong> <em>Triggers the GUI installer if missing.</em></li>
+      <li><strong>Homebrew.</strong> <em>Installs and wires up <code>brew shellenv</code>.</em></li>
+      <li><strong>Clone the repo.</strong> <em>HTTPS, so it works before any auth is set up.</em></li>
+      <li><strong>Brew bundle.</strong> <em>Installs/updates every tool and cask declared in the Brewfile.</em></li>
+      <li><strong>GitHub auth.</strong> <em>Device-code login plus <code>gh auth setup-git</code> as credential helper.</em></li>
+      <li><strong>SSH key.</strong> <em>Generates ed25519 and uploads to your GitHub account.</em></li>
+      <li><strong>Stow.</strong> <em>Symlinks zsh, git, and Ghostty configs into <code>$HOME</code>, backing up existing files.</em></li>
+      <li><strong>mise globals.</strong> <em>Node LTS and pnpm latest as global defaults.</em></li>
+      <li><strong>Override stubs.</strong> <em>Creates empty <code>.gitconfig.local</code>, <code>.zshrc.local</code>, <code>config.local</code>.</em></li>
+      <li><strong>Claude + Codex sign-in.</strong> <em>Launches each CLI for interactive auth, then continues.</em></li>
+      <li><strong>Xcode.</strong> <em>The long pole — <code>xcodes install --latest --select</code>.</em></li>
+    </ol>
+  </section>
 
-  <h2>Source</h2>
-  <p>
-    <a href="https://github.com/emin93/install">github.com/emin93/install</a> ·
-    <a href="https://github.com/emin93/install/blob/main/docs/install.sh">install.sh</a> ·
-    <a href="https://github.com/emin93/install/blob/main/Brewfile">Brewfile</a>
-  </p>
+  <section>
+    <h2>What you still do by hand</h2>
+    <div class="followups">
+      <strong>Two things the script can't do for you:</strong>
+      <ul>
+        <li>Fill in <code>~/.gitconfig.local</code> with your name and email</li>
+        <li>Sign in to apps with GUI-only auth (1Password, Brave sync)</li>
+      </ul>
+    </div>
+  </section>
 
   <footer>
-    Read the script before piping it to your shell.
-    Run it on a Mac you own. Apple Silicon only.
+    <div>Apple Silicon only · MIT</div>
+    <div class="links">
+      <a href="https://github.com/emin93/install">github.com/emin93/install</a>
+      <a href="https://github.com/emin93/install/blob/main/docs/install.sh">install.sh</a>
+      <a href="https://github.com/emin93/install/blob/main/Brewfile">Brewfile</a>
+    </div>
   </footer>
 </main>
+
 <script>
-  const btn = document.getElementById("copy-btn");
-  const cmd = document.getElementById("cmd").textContent;
-  btn.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(cmd);
-      btn.textContent = "Copied";
-      btn.classList.add("copied");
-      setTimeout(() => {
-        btn.textContent = "Copy";
-        btn.classList.remove("copied");
-      }, 1500);
-    } catch (e) {
-      btn.textContent = "Press ⌘C";
-    }
-  });
+  (() => {
+    const btn = document.getElementById("copy-btn");
+    const label = document.getElementById("copy-label");
+    const cmd = 'bash -c "$(curl -fsSL https://install.emin.ch/install.sh)"';
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(cmd);
+        label.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          label.textContent = "Copy";
+          btn.classList.remove("copied");
+        }, 1600);
+      } catch {
+        label.textContent = "Press ⌘C";
+      }
+    });
+  })();
 </script>
 </body>
 </html>
