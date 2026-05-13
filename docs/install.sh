@@ -296,20 +296,34 @@ PY
 
 step_xcode() {
   step "Xcode (latest)"
+  local xcode_app="/Applications/Xcode.app"
+  local receipt="$xcode_app/Contents/_MASReceipt/receipt"
+  if [[ -d "$xcode_app" && -f "$receipt" ]]; then
+    sudo xcode-select -s "$xcode_app"
+    ok "already installed and selected."
+    return
+  fi
   if ! command -v mas >/dev/null 2>&1; then
     warn "mas not installed (expected from Brewfile); skipping."
     return
   fi
-  if mas list 2>/dev/null | awk '{print $1}' | grep -qx 497799835; then
-    ok "already installed via App Store."
-  elif ! mas install 497799835; then
+  # mas needs root to drop the App Store receipt into the root-owned bundle.
+  # Prime sudo so mas's internal non-interactive escalation succeeds.
+  printf "    sudo is needed so mas can write the App Store receipt.\n"
+  if ! sudo -v; then
+    warn "sudo unavailable; skipping Xcode install."
+    return
+  fi
+  if [[ -d "$xcode_app" && ! -f "$receipt" ]]; then
+    warn "removing partial Xcode.app (no App Store receipt) so mas can reinstall."
+    sudo rm -rf "$xcode_app"
+  fi
+  if ! mas install 497799835; then
     warn "mas install failed (signed in to the App Store?); re-run when ready."
     return
   fi
-  if [[ -d /Applications/Xcode.app ]]; then
-    sudo xcode-select -s /Applications/Xcode.app
-    ok "Xcode installed and selected."
-  fi
+  sudo xcode-select -s "$xcode_app"
+  ok "Xcode installed and selected."
 }
 
 step_summary() {
