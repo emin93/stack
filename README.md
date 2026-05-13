@@ -28,11 +28,10 @@ zsh/        ~/.zshrc
 
 ### 1. Install dependencies
 
-[Homebrew](https://brew.sh) is required.
+[Homebrew](https://brew.sh) is required. Everything else is declared in the [`Brewfile`](./Brewfile):
 
 ```bash
-brew install stow ripgrep fd gh ffmpeg node@24
-brew install --cask font-jetbrains-mono
+brew bundle --file=./Brewfile
 ```
 
 `node@24` is keg-only; the shell rc puts it on `PATH` automatically. Enable Corepack-managed pnpm once:
@@ -53,7 +52,7 @@ stow --target="$HOME" ghostty git zsh
 ```bash
 git pull
 stow --target="$HOME" --restow ghostty git zsh   # only if a package was added
-brew install <new-tool>                          # only if README lists a new dep
+brew bundle --file=./Brewfile                    # only if Brewfile changed
 ```
 
 Symlinked configs apply immediately — no restow needed for edits to existing files. ✅
