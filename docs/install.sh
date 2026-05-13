@@ -11,7 +11,9 @@ set -euo pipefail
 # ---- config -----------------------------------------------------------------
 
 REPO_NAME="install"
-REPO_URL="https://github.com/emin93/${REPO_NAME}.git"
+REPO_OWNER="emin93"
+REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
+REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
 STOW_PACKAGES=(git zsh zed)
 PNPM_GLOBAL=(postiz)
@@ -218,6 +220,23 @@ step_1password_ssh() {
   fi
 }
 
+step_repo_remote_ssh() {
+  step "Switch repo origin to SSH"
+  local current
+  current=$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null || true)
+  if [[ "$current" == "$REPO_SSH_URL" ]]; then
+    ok "already SSH."
+    return
+  fi
+  if ! GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new" \
+       git ls-remote "$REPO_SSH_URL" >/dev/null 2>&1; then
+    warn "SSH to GitHub not working yet; leaving origin on HTTPS."
+    return
+  fi
+  git -C "$REPO_DIR" remote set-url origin "$REPO_SSH_URL"
+  ok "origin -> $REPO_SSH_URL"
+}
+
 step_stow() {
   step "Stow configs"
   for target in "${STOW_TARGETS[@]}"; do
@@ -364,6 +383,7 @@ STEPS=(
   step_zed_cli
   step_gh_auth
   step_1password_ssh
+  step_repo_remote_ssh
   step_local_overrides
   step_stow
   step_claude_signin
