@@ -25,8 +25,8 @@
     "xml": true,
   },
   "agent": {
-    "sidebar_side": "right",
-    "dock": "right",
+    "sidebar_side": "left",
+    "dock": "left",
   },
   "edit_predictions": {
     "provider": "none",
@@ -36,10 +36,10 @@
     "XML": ["plist"],
   },
   "project_panel": {
-    "dock": "left",
+    "dock": "right",
   },
   "git_panel": {
-    "dock": "left",
+    "dock": "right",
   },
   "outline_panel": {
     "button": false,
