@@ -4,14 +4,14 @@
       "args": ["dlx", "@agentclientprotocol/claude-agent-acp"],
       "command": "pnpm",
       "env": {},
-      "type": "custom"
+      "type": "custom",
     },
     "Codex": {
       "args": [],
       "command": "codex-acp",
       "env": {},
-      "type": "custom"
-    }
+      "type": "custom",
+    },
   },
   "auto_install_extensions": {
     "astro": true,
@@ -20,60 +20,46 @@
     "kotlin": true,
     "mdx": true,
     "swift": true,
-    "toml": true
+    "toml": true,
   },
   "agent": {
     "sidebar_side": "right",
-    "dock": "right"
+    "dock": "right",
   },
   "edit_predictions": {
-    "provider": "none"
+    "provider": "none",
   },
   "project_panel": {
-    "dock": "left"
+    "dock": "left",
   },
   "git_panel": {
-    "dock": "left"
+    "dock": "left",
   },
   "format_on_save": "on",
   "git": {
     "inline_blame": {
-      "enabled": true
-    }
+      "enabled": true,
+    },
   },
   "icon_theme": {
     "dark": "Catppuccin Mocha",
     "light": "Catppuccin Latte",
-    "mode": "system"
-  },
-  "language_models": {
-    "openai_compatible": {
-      "oMLX": {
-        "api_url": "http://127.0.0.1:8000/v1",
-        "available_models": [
-          {
-            "name": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
-            "display_name": "Qwen3.5 9B OptiQ (oMLX)",
-            "max_tokens": 32768
-          }
-        ]
-      }
-    }
+    "mode": "system",
   },
   "telemetry": {
     "diagnostics": false,
-    "metrics": false
+    "metrics": false,
   },
   "terminal": {
     "copy_on_select": true,
     "dock": "bottom",
     "font_family": "Menlo",
     "font_size": 13,
-    "shell": "system"
+    "shell": "system",
   },
   "theme": {
     "dark": "Catppuccin Mocha",
     "light": "Catppuccin Latte",
-    "mode": "system"
-  }
+    "mode": "system",
+  },
 }
