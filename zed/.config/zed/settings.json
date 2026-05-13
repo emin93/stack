@@ -43,7 +43,7 @@
   "terminal": {
     "copy_on_select": true,
     "dock": "bottom",
-    "font_family": "SF Mono",
+    "font_family": "Menlo",
     "font_size": 13,
     "shell": "system"
   },
