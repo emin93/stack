@@ -1,8 +1,8 @@
 {
   "agent": {
     "commit_message_model": {
-      "provider": "copilot_chat",
       "model": "gpt-5-mini",
+      "provider": "copilot_chat",
     },
     "dock": "left",
     "play_sound_when_agent_done": "when_hidden",
@@ -14,6 +14,9 @@
       "type": "registry",
     },
     "codex-acp": {
+      "type": "registry",
+    },
+    "cursor": {
       "type": "registry",
     },
   },
