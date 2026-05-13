@@ -5,7 +5,6 @@
 
 export EDITOR="nano"
 export VISUAL="$EDITOR"
-export PAGER="less"
 export LESS="-R"
 
 # Local bin dirs
@@ -34,8 +33,7 @@ alias ls='ls -G'
 alias claude='claude --permission-mode bypassPermissions'
 alias codex='codex --yolo'
 
-# Key bindings
-bindkey -e
+# Key bindings — prefix-search on up/down
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
 
