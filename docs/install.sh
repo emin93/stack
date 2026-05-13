@@ -36,7 +36,7 @@ C_DIM=$(printf '\033[2m')
 C_RESET=$(printf '\033[0m')
 
 STEP_NUM=0
-STEP_TOTAL=14
+STEP_TOTAL=15
 
 header() { printf "\n%s==>%s %s\n" "$C_BLUE" "$C_RESET" "$*"; }
 step()   { STEP_NUM=$((STEP_NUM + 1)); printf "\n%s==>%s %s[%d/%d]%s %s\n" "$C_BLUE" "$C_RESET" "$C_DIM" "$STEP_NUM" "$STEP_TOTAL" "$C_RESET" "$*"; }
@@ -112,6 +112,22 @@ step_brew_bundle() {
     brew install --cask --adopt "$cask"
   done < <(brew bundle list --file="$REPO_DIR/Brewfile" --cask)
   brew bundle --file="$REPO_DIR/Brewfile"
+}
+
+step_zed_cli() {
+  step "Zed CLI"
+  local zed_cli="/Applications/Zed.app/Contents/MacOS/cli"
+  local target="/opt/homebrew/bin/zed"
+  if [[ ! -x "$zed_cli" ]]; then
+    warn "Zed.app not found at /Applications; skipping."
+    return
+  fi
+  if [[ -L "$target" && "$(readlink "$target")" == "$zed_cli" ]]; then
+    ok "already linked at $target."
+    return
+  fi
+  ln -sf "$zed_cli" "$target"
+  ok "linked $target -> $zed_cli"
 }
 
 step_gh_auth() {
@@ -305,6 +321,7 @@ main() {
   step_homebrew
   step_clone_repo
   step_brew_bundle
+  step_zed_cli
   step_gh_auth
   step_1password_ssh
   step_local_overrides

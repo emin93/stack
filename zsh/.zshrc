@@ -3,7 +3,7 @@
 # Homebrew
 [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
-export EDITOR="nano"
+export EDITOR="zed --wait"
 export VISUAL="$EDITOR"
 export LESS="-R"
 
