@@ -480,7 +480,13 @@
 
   @media (max-width: 520px) {
     .terminal-title { display: none; }
-    .copy-btn { top: 14px; right: 14px; padding: 6px 10px; font-size: 0.74rem; }
+    .terminal-body { padding: 18px 18px 52px; }
+    .terminal-body code {
+      white-space: pre-wrap;
+      word-break: break-all;
+      padding-right: 0;
+    }
+    .copy-btn { top: auto; bottom: 12px; right: 12px; padding: 6px 10px; font-size: 0.74rem; }
     .grid { grid-template-columns: 1fr; }
   }
 </style>
