@@ -13,7 +13,7 @@ set -euo pipefail
 REPO_NAME="install"
 REPO_URL="https://github.com/emin93/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(ghostty git zsh)
+STOW_PACKAGES=(ghostty git zsh zed)
 
 LOCAL_OVERRIDES=(
   "${HOME}/.gitconfig.local"
@@ -25,6 +25,7 @@ STOW_TARGETS=(
   "${HOME}/.gitconfig"
   "${HOME}/.zshrc"
   "${HOME}/.config/ghostty/config"
+  "${HOME}/.config/zed/settings.json"
 )
 
 # ---- helpers ----------------------------------------------------------------

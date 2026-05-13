@@ -1,0 +1,16 @@
+{
+  "agent_servers": {
+    "Claude Code": {
+      "type": "custom",
+      "command": "claude",
+      "args": ["--permission-mode", "bypassPermissions"],
+      "env": {}
+    },
+    "Codex": {
+      "type": "custom",
+      "command": "codex-acp",
+      "args": ["--yolo"],
+      "env": {}
+    }
+  }
+}
