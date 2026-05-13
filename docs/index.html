@@ -191,13 +191,13 @@
     min-height: 80px;
   }
   .prompt { color: var(--accent); user-select: none; margin-right: 6px; }
-  #cmd-text {
-    font-size: clamp(0.82rem, 1.6vw, 0.95rem);
-    white-space: pre;
-    overflow-x: auto;
+  .terminal-body code {
     display: block;
-    padding-bottom: 4px;
+    font-size: clamp(0.82rem, 1.6vw, 0.95rem);
+    white-space: nowrap;
+    overflow-x: auto;
     padding-right: 80px;
+    padding-bottom: 4px;
   }
   .cursor {
     display: inline-block;
