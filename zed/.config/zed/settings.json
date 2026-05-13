@@ -1,4 +1,7 @@
 {
+  "edit_predictions": {
+    "provider": "none"
+  },
   "auto_install_extensions": {
     "astro": true,
     "catppuccin": true,
@@ -19,9 +22,6 @@
     "dark": "Catppuccin Mocha"
   },
   "format_on_save": "on",
-  "features": {
-    "edit_prediction_provider": "none"
-  },
   "git": {
     "inline_blame": {
       "enabled": true
