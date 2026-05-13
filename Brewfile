@@ -14,6 +14,10 @@ brew "aria2"
 brew "codex-acp"
 brew "jundot/omlx/omlx"
 
+# Language servers (Zed)
+brew "xcode-build-server"
+brew "kotlin-language-server"
+
 # Dev workspace
 cask "zed"
 
