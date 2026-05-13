@@ -27,6 +27,7 @@ cask "codex"
 # Browser & security
 cask "brave-browser"
 cask "1password"
+cask "1password-cli"
 
 # Messaging
 cask "whatsapp"

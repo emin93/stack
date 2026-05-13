@@ -605,7 +605,7 @@
     <div class="subhead">Auth, set up for you</div>
     <div class="chips">
       <span class="chip"><span class="arrow">→</span>GitHub via <code>gh auth login</code></span>
-      <span class="chip"><span class="arrow">→</span>New ed25519 SSH key, uploaded to your account</span>
+      <span class="chip"><span class="arrow">→</span>SSH via 1Password agent (Touch ID), public key uploaded to GitHub</span>
       <span class="chip"><span class="arrow">→</span>Claude Code OAuth</span>
       <span class="chip"><span class="arrow">→</span>Codex sign-in</span>
       <span class="chip"><span class="arrow">→</span>Apple ID for Xcode</span>
@@ -621,7 +621,7 @@
       <li><strong>Clone the repo.</strong><em>HTTPS, so it works before any auth is set up.</em></li>
       <li><strong>Brew bundle.</strong><em>Every tool and cask declared in the Brewfile.</em></li>
       <li><strong>GitHub auth.</strong><em>Device-code login plus <code>gh auth setup-git</code> as credential helper.</em></li>
-      <li><strong>SSH key.</strong><em>Generates ed25519 and uploads to your GitHub account.</em></li>
+      <li><strong>SSH via 1Password.</strong><em>Wires <code>~/.ssh/config</code> to the 1Password SSH agent and uploads the public key (via <code>op</code> + <code>gh</code>) to your GitHub account.</em></li>
       <li><strong>Stow.</strong><em>Symlinks zsh, git, and Ghostty configs into <code>$HOME</code>.</em></li>
       <li><strong>Override stubs.</strong><em>Creates empty <code>.gitconfig.local</code>, <code>.zshrc.local</code>, <code>config.local</code>.</em></li>
       <li><strong>Claude + Codex sign-in.</strong><em>Launches each CLI for interactive auth.</em></li>

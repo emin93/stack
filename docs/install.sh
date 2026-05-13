@@ -130,23 +130,57 @@ step_gh_auth() {
   ok "git credential helper configured."
 }
 
-step_ssh_key() {
-  header "SSH key for GitHub"
-  local key="${HOME}/.ssh/id_ed25519"
-  if [[ -f "$key" ]]; then
-    ok "key already exists at $key."
+step_1password_ssh() {
+  header "SSH via 1Password agent"
+
+  local agent_socket="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+  local ssh_dir="${HOME}/.ssh"
+  local ssh_config="${ssh_dir}/config"
+  local marker="# 1Password SSH agent (managed by install.sh)"
+
+  mkdir -p "$ssh_dir" && chmod 700 "$ssh_dir"
+  touch "$ssh_config" && chmod 600 "$ssh_config"
+
+  if ! grep -Fq "$marker" "$ssh_config"; then
+    printf '\n%s\nHost *\n  IdentityAgent "%s"\n' "$marker" "$agent_socket" >> "$ssh_config"
+    ok "wired ~/.ssh/config to 1Password agent."
+  else
+    ok "~/.ssh/config already references the 1Password agent."
+  fi
+
+  if [[ ! -S "$agent_socket" ]]; then
+    warn "1Password SSH agent isn't running yet."
+    printf "    1) Open 1Password, sign in.\n"
+    printf "    2) Settings → Developer → enable 'Use the SSH agent'.\n"
+    printf "    3) Same panel → enable 'Integrate with 1Password CLI'.\n"
+    read -rp "    Press Enter once those are on... " _
+  fi
+
+  if ! command -v op >/dev/null 2>&1; then
+    warn "1Password CLI (op) not on PATH; upload your public key to GitHub by hand."
     return
   fi
-  mkdir -p "${HOME}/.ssh"
-  chmod 700 "${HOME}/.ssh"
-  local email
-  email=$(gh api user --jq .email 2>/dev/null || true)
-  [[ -z "$email" || "$email" == "null" ]] && email="$(whoami)@$(hostname)"
-  ssh-keygen -t ed25519 -C "$email" -f "$key" -N ""
-  eval "$(ssh-agent -s)" >/dev/null
-  ssh-add --apple-use-keychain "$key" 2>/dev/null || ssh-add "$key"
-  gh ssh-key add "${key}.pub" --title "$(hostname)" --type authentication
-  ok "key generated and uploaded to GitHub."
+
+  local key_id
+  key_id=$(op item list --categories "SSH Key" 2>/dev/null | awk 'NR==2 {print $1}')
+  if [[ -z "$key_id" ]]; then
+    warn "no SSH key found in 1Password — create one in the GUI (New Item → SSH Key) and re-run."
+    return
+  fi
+
+  local pubkey
+  pubkey=$(op item get "$key_id" --field 'public key' 2>/dev/null || true)
+  if [[ -z "$pubkey" ]]; then
+    warn "couldn't read public key from 1Password (is the GUI integration enabled?)."
+    return
+  fi
+
+  if gh ssh-key list 2>/dev/null | grep -Fq "$pubkey"; then
+    ok "1Password public key already on GitHub."
+  else
+    printf '%s\n' "$pubkey" | gh ssh-key add - --title "$(hostname)" --type authentication
+    ok "uploaded 1Password public key to GitHub."
+  fi
 }
 
 step_stow() {
@@ -219,7 +253,7 @@ main() {
   step_brew_bundle
   step_pnpm_node
   step_gh_auth
-  step_ssh_key
+  step_1password_ssh
   step_local_overrides
   step_stow
   step_claude_signin
