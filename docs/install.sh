@@ -16,7 +16,7 @@ REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
 STOW_PACKAGES=(git zsh zed)
-PNPM_GLOBAL=(postiz)
+PNPM_GLOBAL=(postiz wrangler)
 
 LOCAL_OVERRIDES=(
   "${HOME}/.gitconfig.local"
