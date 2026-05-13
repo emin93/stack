@@ -12,7 +12,9 @@
 | 📁 [fd](https://github.com/sharkdp/fd) | Fast file finder |
 | 🐙 [gh](https://cli.github.com) | GitHub CLI |
 | 🎬 [ffmpeg](https://ffmpeg.org) | Audio/video processing |
-| 📦 [mise](https://mise.jdx.dev) | Per-project runtime manager (node, python, etc.) |
+| 🟢 [node](https://nodejs.org) | JavaScript runtime |
+| 📦 [pnpm](https://pnpm.io) | Node package manager |
+| 🦫 [go](https://go.dev) | Go toolchain |
 | 🔨 [xcodes](https://github.com/XcodesOrg/xcodes) | Install/switch Xcode versions |
 | ⚡ [aria2](https://aria2.github.io) | Parallel downloads (used by `xcodes`) |
 
@@ -35,10 +37,6 @@ bash -c "$(curl -fsSL https://install.emin.ch/install.sh)"
 ```
 
 See [install.emin.ch](https://install.emin.ch) for what it does step-by-step. Safe to re-run on an existing setup — it adds missing pieces and bumps versions.
-
-### Per-project runtimes
-
-Drop a `mise.toml` in any repo pinning what it needs (e.g. `node = "lts"`, `pnpm = "11.1.1"`, `go = "1.26"`). `mise` switches automatically on `cd` — run `mise install` once to materialize, and `mise trust` the first time you enter a new repo.
 
 ### After pulling changes
 

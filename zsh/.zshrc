@@ -39,8 +39,5 @@ bindkey -e
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
 
-# mise — manages node/python/etc per project (reads .tool-versions / mise.toml)
-command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
-
 # Per-host overrides (secrets, machine-specific tweaks)
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

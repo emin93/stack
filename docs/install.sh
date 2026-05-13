@@ -144,12 +144,6 @@ step_stow() {
   ok "stowed: ${STOW_PACKAGES[*]}"
 }
 
-step_mise_globals() {
-  header "mise global runtimes"
-  mise use -g node@lts pnpm@latest
-  ok "$(mise current 2>/dev/null | tr '\n' ' ')"
-}
-
 step_local_overrides() {
   header "Local override files"
   for f in "${LOCAL_OVERRIDES[@]}"; do
@@ -209,7 +203,6 @@ main() {
   step_gh_auth
   step_ssh_key
   step_stow
-  step_mise_globals
   step_local_overrides
   step_claude_signin
   step_codex_signin
