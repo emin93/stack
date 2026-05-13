@@ -12,6 +12,7 @@ brew "go"
 brew "mas"
 brew "aria2"
 brew "tokei"
+brew "webp"
 brew "jundot/omlx/omlx"
 
 # Language servers (Zed)
