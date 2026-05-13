@@ -22,6 +22,7 @@
     "swift": true,
     "toml": true,
     "vscode-icons": true,
+    "xml": true,
   },
   "agent": {
     "sidebar_side": "right",
@@ -32,6 +33,7 @@
   },
   "file_types": {
     "JSON": ["xcstrings"],
+    "XML": ["plist"],
   },
   "project_panel": {
     "dock": "left",
