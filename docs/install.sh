@@ -14,6 +14,7 @@ REPO_NAME="install"
 REPO_URL="https://github.com/emin93/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
 STOW_PACKAGES=(git zsh zed)
+PNPM_GLOBAL=(postiz)
 
 LOCAL_OVERRIDES=(
   "${HOME}/.gitconfig.local"
@@ -102,6 +103,32 @@ step_clone_repo() {
 step_brew_bundle() {
   step "Brew bundle"
   HOMEBREW_CASK_OPTS="--adopt" brew bundle --file="$REPO_DIR/Brewfile"
+}
+
+step_pnpm_global() {
+  step "pnpm global packages"
+  if ! command -v pnpm >/dev/null 2>&1; then
+    warn "pnpm not on PATH; skipping."
+    return
+  fi
+  if [[ ${#PNPM_GLOBAL[@]} -eq 0 ]]; then
+    ok "nothing to install."
+    return
+  fi
+  # Match the PNPM_HOME exported by zsh/.zshrc so pnpm add -g works before
+  # the stowed shell config is loaded.
+  export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
+  export PATH="$PNPM_HOME/bin:$PATH"
+  local installed
+  installed=$(pnpm ls -g --depth=0 --parseable 2>/dev/null || true)
+  for pkg in "${PNPM_GLOBAL[@]}"; do
+    if grep -Fq "/${pkg}" <<<"$installed"; then
+      ok "$pkg already installed."
+    else
+      pnpm add -g "$pkg"
+      ok "installed $pkg."
+    fi
+  done
 }
 
 step_zed_cli() {
@@ -333,6 +360,7 @@ STEPS=(
   step_homebrew
   step_clone_repo
   step_brew_bundle
+  step_pnpm_global
   step_zed_cli
   step_gh_auth
   step_1password_ssh
