@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # install.sh — provision a fresh Apple Silicon Mac.
-# https://install.emin.ch
+# https://stack.emin.ch
 #
 # Designed to be run interactively. Invoke via:
-#   bash -c "$(curl -fsSL https://install.emin.ch/install.sh)"
+#   bash -c "$(curl -fsSL https://stack.emin.ch/install.sh)"
 # The bash -c form (rather than `curl | bash`) keeps stdin attached to the
 # TTY, which is required for the interactive sign-in prompts.
 set -euo pipefail
 
 # ---- config -----------------------------------------------------------------
 
-REPO_NAME="install"
+REPO_NAME="stack"
 REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
@@ -86,7 +86,7 @@ step_homebrew() {
 }
 
 step_clone_repo() {
-  step "Clone install repo to $REPO_DIR"
+  step "Clone stack repo to $REPO_DIR"
   mkdir -p "$(dirname "$REPO_DIR")"
   if [[ -d "$REPO_DIR/.git" ]]; then
     local existing
