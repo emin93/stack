@@ -36,7 +36,7 @@ C_DIM=$(printf '\033[2m')
 C_RESET=$(printf '\033[0m')
 
 STEP_NUM=0
-STEP_TOTAL=12
+STEP_TOTAL=14
 
 header() { printf "\n%s==>%s %s\n" "$C_BLUE" "$C_RESET" "$*"; }
 step()   { STEP_NUM=$((STEP_NUM + 1)); printf "\n%s==>%s %s[%d/%d]%s %s\n" "$C_BLUE" "$C_RESET" "$C_DIM" "$STEP_NUM" "$STEP_TOTAL" "$C_RESET" "$*"; }
@@ -217,6 +217,24 @@ step_claude_signin() {
   claude auth login || warn "claude auth login didn't complete; re-run when ready."
 }
 
+step_claude_settings() {
+  step "Claude Code default mode"
+  local settings_file="${HOME}/.claude/settings.json"
+  mkdir -p "$(dirname "$settings_file")"
+  [[ -f "$settings_file" ]] || echo '{}' > "$settings_file"
+  python3 - "$settings_file" <<'PY'
+import json, sys
+path = sys.argv[1]
+with open(path) as f:
+    settings = json.load(f)
+settings.setdefault("permissions", {})["defaultMode"] = "bypassPermissions"
+with open(path, "w") as f:
+    json.dump(settings, f, indent=2)
+    f.write("\n")
+PY
+  ok "permissions.defaultMode = bypassPermissions"
+}
+
 step_codex_signin() {
   step "Codex sign-in"
   if ! command -v codex >/dev/null 2>&1; then
@@ -228,6 +246,36 @@ step_codex_signin() {
     return
   fi
   codex login || warn "codex login didn't complete; re-run when ready."
+}
+
+step_codex_settings() {
+  step "Codex default mode"
+  local config_file="${HOME}/.codex/config.toml"
+  mkdir -p "$(dirname "$config_file")"
+  touch "$config_file"
+  python3 - "$config_file" <<'PY'
+import re, sys, pathlib
+path = pathlib.Path(sys.argv[1])
+content = path.read_text()
+
+def set_top_key(text, key, value):
+    line = f"{key} = {value}\n"
+    section = re.search(r"^\[", text, flags=re.MULTILINE)
+    head, tail = (text[:section.start()], text[section.start():]) if section else (text, "")
+    pat = re.compile(rf"^{re.escape(key)}\s*=.*\n?", flags=re.MULTILINE)
+    if pat.search(head):
+        head = pat.sub(line, head)
+    else:
+        if head and not head.endswith("\n"):
+            head += "\n"
+        head += line
+    return head + tail
+
+content = set_top_key(content, "approval_policy", '"never"')
+content = set_top_key(content, "sandbox_mode", '"danger-full-access"')
+path.write_text(content)
+PY
+  ok "approval_policy=never, sandbox_mode=danger-full-access"
 }
 
 step_xcode() {
@@ -262,7 +310,9 @@ main() {
   step_local_overrides
   step_stow
   step_claude_signin
+  step_claude_settings
   step_codex_signin
+  step_codex_settings
   step_xcode
   step_summary
 }
