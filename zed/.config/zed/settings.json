@@ -22,8 +22,18 @@
     "swift": true,
     "toml": true
   },
+  "agent": {
+    "sidebar_side": "right",
+    "dock": "right"
+  },
   "edit_predictions": {
     "provider": "none"
+  },
+  "project_panel": {
+    "dock": "left"
+  },
+  "git_panel": {
+    "dock": "left"
   },
   "format_on_save": "on",
   "git": {
@@ -35,6 +45,20 @@
     "dark": "Catppuccin Mocha",
     "light": "Catppuccin Latte",
     "mode": "system"
+  },
+  "language_models": {
+    "openai_compatible": {
+      "oMLX": {
+        "api_url": "http://127.0.0.1:8000/v1",
+        "available_models": [
+          {
+            "name": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
+            "display_name": "Qwen3.5 9B OptiQ (oMLX)",
+            "max_tokens": 32768
+          }
+        ]
+      }
+    }
   },
   "telemetry": {
     "diagnostics": false,
