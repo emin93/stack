@@ -11,7 +11,7 @@ brew "go"
 brew "xcodes"
 brew "aria2"
 brew "codex-acp"
-brew "omlx"
+brew "jundot/omlx/omlx"
 
 # Dev workspace
 cask "zed"
