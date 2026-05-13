@@ -36,7 +36,6 @@ C_DIM=$(printf '\033[2m')
 C_RESET=$(printf '\033[0m')
 
 STEP_NUM=0
-STEP_TOTAL=15
 
 header() { printf "\n%s==>%s %s\n" "$C_BLUE" "$C_RESET" "$*"; }
 step()   { STEP_NUM=$((STEP_NUM + 1)); printf "\n%s==>%s %s[%d/%d]%s %s\n" "$C_BLUE" "$C_RESET" "$C_DIM" "$STEP_NUM" "$STEP_TOTAL" "$C_RESET" "$*"; }
@@ -102,16 +101,7 @@ step_clone_repo() {
 
 step_brew_bundle() {
   step "Brew bundle"
-  local cask
-  while IFS= read -r cask; do
-    [[ -n "$cask" ]] || continue
-    if brew list --cask "$cask" >/dev/null 2>&1; then
-      ok "cask already installed: $cask"
-      continue
-    fi
-    brew install --cask --adopt "$cask"
-  done < <(brew bundle list --file="$REPO_DIR/Brewfile" --cask)
-  brew bundle --file="$REPO_DIR/Brewfile"
+  HOMEBREW_CASK_OPTS="--adopt" brew bundle --file="$REPO_DIR/Brewfile"
 }
 
 step_zed_cli() {
@@ -211,13 +201,9 @@ step_local_overrides() {
   step "Local override files"
   for f in "${LOCAL_OVERRIDES[@]}"; do
     mkdir -p "$(dirname "$f")"
-    if [[ ! -e "$f" ]]; then
-      touch "$f"
-      ok "created $f"
-    else
-      ok "$f already exists."
-    fi
+    touch "$f"
   done
+  ok "ensured ${#LOCAL_OVERRIDES[@]} override file(s)."
 }
 
 step_claude_signin() {
@@ -334,7 +320,7 @@ step_summary() {
 
 # ---- main -------------------------------------------------------------------
 
-main() {
+STEPS=(
   step_sanity_checks
   step_xcode_clt
   step_homebrew
@@ -350,6 +336,11 @@ main() {
   step_codex_signin
   step_codex_settings
   step_xcode
+)
+STEP_TOTAL=${#STEPS[@]}
+
+main() {
+  for s in "${STEPS[@]}"; do "$s"; done
   step_summary
 }
 
