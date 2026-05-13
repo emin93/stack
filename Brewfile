@@ -12,7 +12,6 @@ brew "go"
 brew "mas"
 brew "aria2"
 brew "tokei"
-brew "codex-acp"
 brew "jundot/omlx/omlx"
 
 # Language servers (Zed)

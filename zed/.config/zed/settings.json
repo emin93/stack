@@ -1,22 +1,20 @@
 {
   "agent": {
+    "commit_message_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-5-mini",
+    },
     "dock": "left",
     "play_sound_when_agent_done": "when_hidden",
     "sidebar_side": "left",
     "single_file_review": true,
   },
   "agent_servers": {
-    "Claude Code": {
-      "args": ["dlx", "@agentclientprotocol/claude-agent-acp"],
-      "command": "pnpm",
-      "env": {},
-      "type": "custom",
+    "claude-acp": {
+      "type": "registry",
     },
-    "Codex": {
-      "args": [],
-      "command": "codex-acp",
-      "env": {},
-      "type": "custom",
+    "codex-acp": {
+      "type": "registry",
     },
   },
   "auto_install_extensions": {
@@ -72,6 +70,9 @@
   },
   "project_panel": {
     "dock": "right",
+  },
+  "tabs": {
+    "git_status": true,
   },
   "telemetry": {
     "diagnostics": false,
