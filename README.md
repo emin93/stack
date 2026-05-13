@@ -1,6 +1,6 @@
-# 🛠️ dotfiles
+# 🛠️ install
 
-> Terminal + dev environment config for macOS 🍎.
+> One-command provisioning for a fresh Apple Silicon Mac. Hosted at [install.emin.ch](https://install.emin.ch).
 
 ## ✨ Stack
 
@@ -28,37 +28,22 @@ zsh/        ~/.zshrc
 
 ## 🚀 Install
 
-### 1. Install dependencies
-
-[Homebrew](https://brew.sh) is required. Everything else is declared in the [`Brewfile`](./Brewfile):
+On a fresh Mac, paste this into Terminal:
 
 ```bash
-brew bundle --file=./Brewfile
+bash -c "$(curl -fsSL https://install.emin.ch/install.sh)"
 ```
 
-Install global defaults for Node and pnpm:
+See [install.emin.ch](https://install.emin.ch) for what it does step-by-step. Safe to re-run on an existing setup — it adds missing pieces and bumps versions.
+
+### Per-project runtimes
+
+Drop a `mise.toml` in any repo pinning what it needs (e.g. `node = "lts"`, `pnpm = "11.1.1"`, `go = "1.26"`). `mise` switches automatically on `cd` — run `mise install` once to materialize, and `mise trust` the first time you enter a new repo.
+
+### After pulling changes
 
 ```bash
-mise use -g node@lts pnpm@latest
-```
-
-Per-project versions: drop a `mise.toml` in the repo root pinning whatever the project needs (e.g. `node = "lts"`, `pnpm = "11.1.1"`, `go = "1.26"`). `mise` switches automatically on `cd` — run `mise install` once to materialize the versions, and `mise trust` the first time you enter a new repo.
-
-Install Xcode (kept out of the Brewfile because it's ~10GB+ and prompts for an Apple ID):
-
-```bash
-xcodes install --latest --select
-```
-
-### 2. Stow each package
-
-```bash
-stow --target="$HOME" ghostty git zsh
-```
-
-### 🔄 After pulling changes
-
-```bash
+cd ~/Documents/Projects/install
 git pull
 stow --target="$HOME" --restow ghostty git zsh   # only if a package was added
 brew bundle --file=./Brewfile                    # only if Brewfile changed

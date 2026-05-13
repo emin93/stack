@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>install.emin.ch — fresh Mac setup</title>
+<meta name="description" content="One command to provision a fresh Apple Silicon Mac: Homebrew, dev tools, dotfiles, Xcode.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fafafa;
+    --fg: #18181b;
+    --muted: #71717a;
+    --accent: #2563eb;
+    --code-bg: #18181b;
+    --code-fg: #fafafa;
+    --border: #e4e4e7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #09090b;
+      --fg: #fafafa;
+      --muted: #a1a1aa;
+      --accent: #60a5fa;
+      --code-bg: #18181b;
+      --code-fg: #fafafa;
+      --border: #27272a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+  .tagline {
+    color: var(--muted);
+    font-size: 1.05rem;
+    margin: 0 0 40px;
+  }
+  h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 40px 0 12px;
+  }
+  p { margin: 0 0 16px; }
+  ul {
+    padding-left: 20px;
+    margin: 0 0 16px;
+  }
+  li { margin-bottom: 4px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .command {
+    position: relative;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: 10px;
+    padding: 20px 64px 20px 20px;
+    font-size: 0.92rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--code-fg);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .copy-btn:hover { background: rgba(255, 255, 255, 0.15); }
+  .copy-btn.copied { background: #16a34a; border-color: #16a34a; }
+  .muted-block {
+    color: var(--muted);
+    font-size: 0.92rem;
+    border-left: 2px solid var(--border);
+    padding-left: 16px;
+    margin: 24px 0;
+  }
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>install.emin.ch</h1>
+  <p class="tagline">One command to provision a fresh Apple Silicon Mac.</p>
+
+  <div class="command">
+    <button class="copy-btn" id="copy-btn" type="button">Copy</button><span id="cmd">bash -c "$(curl -fsSL https://install.emin.ch/install.sh)"</span>
+  </div>
+
+  <p class="muted-block">
+    Paste into Terminal on a fresh Mac. You'll be guided through every sign-in
+    (GitHub, Claude Code, Codex, Apple ID). The same command on an existing
+    setup is safe — it adds missing pieces and bumps versions.
+  </p>
+
+  <h2>What gets installed</h2>
+  <ul>
+    <li>Xcode Command Line Tools + latest Xcode (via <a href="https://github.com/XcodesOrg/xcodes">xcodes</a>)</li>
+    <li>Homebrew, then everything in the <a href="https://github.com/emin93/install/blob/main/Brewfile">Brewfile</a>: ripgrep, fd, gh, ffmpeg, mise, stow, aria2, JetBrains Mono</li>
+    <li>Casks: Ghostty, 1Password, Brave, Claude Code, Codex</li>
+    <li><a href="https://mise.jdx.dev">mise</a> with global Node LTS and latest pnpm</li>
+    <li>Dotfiles symlinked via <code>stow</code>: zsh, git, Ghostty</li>
+    <li>A new ed25519 SSH key, uploaded to your GitHub account</li>
+  </ul>
+
+  <h2>What you still do by hand</h2>
+  <ul>
+    <li>Fill in <code>~/.gitconfig.local</code> with your name and email</li>
+    <li>Sign in to apps with GUI-only auth (1Password, Brave)</li>
+  </ul>
+
+  <h2>Source</h2>
+  <p>
+    <a href="https://github.com/emin93/install">github.com/emin93/install</a> ·
+    <a href="https://github.com/emin93/install/blob/main/docs/install.sh">install.sh</a> ·
+    <a href="https://github.com/emin93/install/blob/main/Brewfile">Brewfile</a>
+  </p>
+
+  <footer>
+    Read the script before piping it to your shell.
+    Run it on a Mac you own. Apple Silicon only.
+  </footer>
+</main>
+<script>
+  const btn = document.getElementById("copy-btn");
+  const cmd = document.getElementById("cmd").textContent;
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(cmd);
+      btn.textContent = "Copied";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = "Copy";
+        btn.classList.remove("copied");
+      }, 1500);
+    } catch (e) {
+      btn.textContent = "Press ⌘C";
+    }
+  });
+</script>
+</body>
+</html>
