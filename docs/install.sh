@@ -13,18 +13,16 @@ set -euo pipefail
 REPO_NAME="install"
 REPO_URL="https://github.com/emin93/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(ghostty git zsh zed)
+STOW_PACKAGES=(git zsh zed)
 
 LOCAL_OVERRIDES=(
   "${HOME}/.gitconfig.local"
   "${HOME}/.zshrc.local"
-  "${HOME}/.config/ghostty/config.local"
 )
 
 STOW_TARGETS=(
   "${HOME}/.gitconfig"
   "${HOME}/.zshrc"
-  "${HOME}/.config/ghostty/config"
   "${HOME}/.config/zed/settings.json"
 )
 
@@ -240,7 +238,7 @@ step_xcode() {
 
 step_summary() {
   header "Done"
-  printf "    Open a new Ghostty window to pick up the new shell environment.\n\n"
+  printf "    Open a new Terminal or Zed terminal to pick up the new shell environment.\n\n"
 }
 
 # ---- main -------------------------------------------------------------------

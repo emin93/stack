@@ -14,7 +14,6 @@ brew "codex-acp"
 brew "omlx"
 
 # Dev workspace
-cask "ghostty"
 cask "zed"
 
 # Native IDEs
