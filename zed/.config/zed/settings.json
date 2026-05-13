@@ -29,7 +29,7 @@
     "dock": "left",
   },
   "edit_predictions": {
-    "provider": "none",
+    "provider": "zed",
   },
   "file_types": {
     "JSON": ["xcstrings"],
