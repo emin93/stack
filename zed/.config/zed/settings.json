@@ -1,6 +1,17 @@
 {
-  "edit_predictions": {
-    "provider": "none"
+  "agent_servers": {
+    "Claude Code": {
+      "args": ["--permission-mode", "bypassPermissions"],
+      "command": "claude",
+      "env": {},
+      "type": "custom"
+    },
+    "Codex": {
+      "args": ["--yolo"],
+      "command": "codex-acp",
+      "env": {},
+      "type": "custom"
+    }
   },
   "auto_install_extensions": {
     "astro": true,
@@ -11,15 +22,8 @@
     "swift": true,
     "toml": true
   },
-  "theme": {
-    "mode": "system",
-    "light": "Catppuccin Latte",
-    "dark": "Catppuccin Mocha"
-  },
-  "icon_theme": {
-    "mode": "system",
-    "light": "Catppuccin Latte",
-    "dark": "Catppuccin Mocha"
+  "edit_predictions": {
+    "provider": "none"
   },
   "format_on_save": "on",
   "git": {
@@ -27,29 +31,25 @@
       "enabled": true
     }
   },
+  "icon_theme": {
+    "dark": "Catppuccin Mocha",
+    "light": "Catppuccin Latte",
+    "mode": "system"
+  },
   "telemetry": {
-    "metrics": false,
-    "diagnostics": false
+    "diagnostics": false,
+    "metrics": false
   },
   "terminal": {
-    "shell": "system",
+    "copy_on_select": true,
+    "dock": "bottom",
     "font_family": "SF Mono",
     "font_size": 13,
-    "copy_on_select": true,
-    "dock": "bottom"
+    "shell": "system"
   },
-  "agent_servers": {
-    "Claude Code": {
-      "type": "custom",
-      "command": "claude",
-      "args": ["--permission-mode", "bypassPermissions"],
-      "env": {}
-    },
-    "Codex": {
-      "type": "custom",
-      "command": "codex-acp",
-      "args": ["--yolo"],
-      "env": {}
-    }
+  "theme": {
+    "dark": "Catppuccin Mocha",
+    "light": "Catppuccin Latte",
+    "mode": "system"
   }
 }
