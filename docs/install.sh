@@ -110,6 +110,14 @@ step_brew_bundle() {
   brew bundle --file="$REPO_DIR/Brewfile"
 }
 
+step_pnpm_node() {
+  header "Node via pnpm"
+  command -v pnpm >/dev/null 2>&1 || die "pnpm not installed (expected from Brewfile)."
+  export PNPM_HOME="${HOME}/Library/pnpm"
+  pnpm env use --global lts
+  ok "node $("${PNPM_HOME}/node" --version 2>/dev/null || echo "?")"
+}
+
 step_gh_auth() {
   header "GitHub auth"
   if gh auth status >/dev/null 2>&1; then
@@ -208,6 +216,7 @@ main() {
   step_homebrew
   step_clone_repo
   step_brew_bundle
+  step_pnpm_node
   step_gh_auth
   step_ssh_key
   step_local_overrides
