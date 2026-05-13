@@ -11,12 +11,19 @@ brew "pnpm"
 brew "go"
 brew "mas"
 brew "aria2"
+brew "tokei"
 brew "codex-acp"
 brew "jundot/omlx/omlx"
 
 # Language servers (Zed)
 brew "xcode-build-server"
 brew "kotlin-language-server"
+
+# iOS/macOS dev
+brew "xcbeautify"
+
+# Android dev
+cask "android-platform-tools"
 
 # Dev workspace
 cask "zed"
