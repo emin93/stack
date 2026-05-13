@@ -1,8 +1,8 @@
 {
   "agent_servers": {
     "Claude Code": {
-      "args": ["--permission-mode", "bypassPermissions"],
-      "command": "claude",
+      "args": ["-y", "@zed-industries/claude-code-acp"],
+      "command": "npx",
       "env": {},
       "type": "custom"
     },
