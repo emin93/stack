@@ -98,6 +98,15 @@ step_clone_repo() {
 
 step_brew_bundle() {
   header "Brew bundle"
+  local cask
+  while IFS= read -r cask; do
+    [[ -n "$cask" ]] || continue
+    if brew list --cask "$cask" >/dev/null 2>&1; then
+      ok "cask already installed: $cask"
+      continue
+    fi
+    brew install --cask --adopt "$cask"
+  done < <(brew bundle list --file="$REPO_DIR/Brewfile" --cask)
   brew bundle --file="$REPO_DIR/Brewfile"
 }
 
@@ -201,8 +210,8 @@ main() {
   step_brew_bundle
   step_gh_auth
   step_ssh_key
-  step_stow
   step_local_overrides
+  step_stow
   step_claude_signin
   step_codex_signin
   step_xcode
