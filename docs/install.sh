@@ -32,9 +32,14 @@ C_BLUE=$(printf '\033[34m')
 C_GREEN=$(printf '\033[32m')
 C_YELLOW=$(printf '\033[33m')
 C_RED=$(printf '\033[31m')
+C_DIM=$(printf '\033[2m')
 C_RESET=$(printf '\033[0m')
 
+STEP_NUM=0
+STEP_TOTAL=12
+
 header() { printf "\n%s==>%s %s\n" "$C_BLUE" "$C_RESET" "$*"; }
+step()   { STEP_NUM=$((STEP_NUM + 1)); printf "\n%s==>%s %s[%d/%d]%s %s\n" "$C_BLUE" "$C_RESET" "$C_DIM" "$STEP_NUM" "$STEP_TOTAL" "$C_RESET" "$*"; }
 ok()     { printf "    %s✓%s %s\n" "$C_GREEN" "$C_RESET" "$*"; }
 warn()   { printf "    %s!%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 die()    { printf "%s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; exit 1; }
@@ -42,7 +47,7 @@ die()    { printf "%s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; exit 1; }
 # ---- steps ------------------------------------------------------------------
 
 step_sanity_checks() {
-  header "Sanity checks"
+  step "Sanity checks"
   [[ "$(uname -s)" == "Darwin" ]] || die "macOS only."
   [[ "$(uname -m)" == "arm64" ]] || die "Apple Silicon only."
   [[ "$EUID" -ne 0 ]] || die "Do not run as root."
@@ -50,7 +55,7 @@ step_sanity_checks() {
 }
 
 step_xcode_clt() {
-  header "Xcode Command Line Tools"
+  step "Xcode Command Line Tools"
   if xcode-select -p >/dev/null 2>&1; then
     ok "already installed."
     return
@@ -66,7 +71,7 @@ step_xcode_clt() {
 }
 
 step_homebrew() {
-  header "Homebrew"
+  step "Homebrew"
   if ! command -v brew >/dev/null 2>&1; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
@@ -79,7 +84,7 @@ step_homebrew() {
 }
 
 step_clone_repo() {
-  header "Clone install repo to $REPO_DIR"
+  step "Clone install repo to $REPO_DIR"
   mkdir -p "$(dirname "$REPO_DIR")"
   if [[ -d "$REPO_DIR/.git" ]]; then
     local existing
@@ -96,7 +101,7 @@ step_clone_repo() {
 }
 
 step_brew_bundle() {
-  header "Brew bundle"
+  step "Brew bundle"
   local cask
   while IFS= read -r cask; do
     [[ -n "$cask" ]] || continue
@@ -110,7 +115,7 @@ step_brew_bundle() {
 }
 
 step_gh_auth() {
-  header "GitHub auth"
+  step "GitHub auth"
   if gh auth status >/dev/null 2>&1; then
     ok "already authenticated."
   else
@@ -121,7 +126,7 @@ step_gh_auth() {
 }
 
 step_1password_ssh() {
-  header "SSH via 1Password agent"
+  step "SSH via 1Password agent"
 
   local agent_socket="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
   local ssh_dir="${HOME}/.ssh"
@@ -174,7 +179,7 @@ step_1password_ssh() {
 }
 
 step_stow() {
-  header "Stow configs"
+  step "Stow configs"
   for target in "${STOW_TARGETS[@]}"; do
     if [[ -e "$target" && ! -L "$target" ]]; then
       mv "$target" "${target}.pre-install.bak"
@@ -187,7 +192,7 @@ step_stow() {
 }
 
 step_local_overrides() {
-  header "Local override files"
+  step "Local override files"
   for f in "${LOCAL_OVERRIDES[@]}"; do
     mkdir -p "$(dirname "$f")"
     if [[ ! -e "$f" ]]; then
@@ -200,7 +205,7 @@ step_local_overrides() {
 }
 
 step_claude_signin() {
-  header "Claude Code sign-in"
+  step "Claude Code sign-in"
   if ! command -v claude >/dev/null 2>&1; then
     warn "claude CLI not on PATH yet. Open a new shell after this finishes and run 'claude'."
     return
@@ -211,7 +216,7 @@ step_claude_signin() {
 }
 
 step_codex_signin() {
-  header "Codex sign-in"
+  step "Codex sign-in"
   if ! command -v codex >/dev/null 2>&1; then
     warn "codex CLI not on PATH yet. Open a new shell after this finishes and run 'codex'."
     return
@@ -222,14 +227,21 @@ step_codex_signin() {
 }
 
 step_xcode() {
-  header "Xcode (latest)"
-  command -v xcodes >/dev/null 2>&1 || die "xcodes not installed (expected from Brewfile)."
-  xcodes install --latest --select
+  step "Xcode (latest)"
+  if ! command -v xcodes >/dev/null 2>&1; then
+    warn "xcodes not installed (expected from Brewfile); skipping."
+    return
+  fi
+  if ! xcodes install --latest --select; then
+    warn "xcodes install failed (Apple ID not signed in?); re-run when ready."
+    return
+  fi
   ok "Xcode installed and selected."
 }
 
 step_summary() {
   header "Done"
+  ok "${STEP_NUM}/${STEP_TOTAL} steps completed."
   printf "    Open a new Terminal or Zed terminal to pick up the new shell environment.\n\n"
 }
 
