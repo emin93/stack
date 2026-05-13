@@ -15,6 +15,7 @@
   },
   "auto_install_extensions": {
     "astro": true,
+    "git-firefly": true,
     "kotlin": true,
     "macos-classic": true,
     "mdx": true,
