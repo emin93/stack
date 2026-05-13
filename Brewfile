@@ -1,3 +1,5 @@
+tap "jundot/omlx", "https://github.com/jundot/omlx"
+
 brew "stow"
 brew "ripgrep"
 brew "fd"
@@ -7,8 +9,11 @@ brew "pnpm"
 brew "go"
 brew "xcodes"
 brew "aria2"
+brew "codex-acp"
+brew "omlx"
 
 cask "ghostty"
+cask "zed"
 cask "1password"
 cask "brave-browser"
 cask "claude-code@latest"
