@@ -18,6 +18,33 @@
     "light": "Catppuccin Latte",
     "dark": "Catppuccin Mocha"
   },
+  "format_on_save": "on",
+  "features": {
+    "edit_prediction_provider": "zed"
+  },
+  "git": {
+    "inline_blame": {
+      "enabled": true
+    }
+  },
+  "telemetry": {
+    "metrics": false,
+    "diagnostics": false
+  },
+  "terminal": {
+    "shell": "system",
+    "font_family": "SF Mono",
+    "font_size": 13,
+    "copy_on_select": true,
+    "dock": "bottom"
+  },
+  "agent": {
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-opus-4-8"
+    },
+    "always_allow_tool_actions": true
+  },
   "agent_servers": {
     "Claude Code": {
       "type": "custom",
