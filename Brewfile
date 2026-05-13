@@ -9,7 +9,6 @@ brew "go"
 brew "xcodes"
 brew "aria2"
 
-cask "font-jetbrains-mono"
 cask "ghostty"
 cask "1password"
 cask "brave-browser"
