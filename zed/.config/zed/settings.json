@@ -29,11 +29,26 @@
   "edit_predictions": {
     "provider": "none",
   },
+  "file_types": {
+    "JSON": ["xcstrings"],
+  },
   "project_panel": {
     "dock": "left",
   },
   "git_panel": {
     "dock": "left",
+  },
+  "outline_panel": {
+    "button": false,
+  },
+  "collaboration_panel": {
+    "button": false,
+  },
+  "debugger": {
+    "button": false,
+  },
+  "diagnostics": {
+    "button": false,
   },
   "format_on_save": "on",
   "git": {
