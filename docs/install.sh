@@ -152,7 +152,7 @@ step_1password_ssh() {
   fi
 
   local key_id
-  key_id=$(op item list --categories "SSH Key" 2>/dev/null | awk 'NR==2 {print $1}')
+  key_id=$(op item list --categories "SSH Key" 2>/dev/null | awk 'NR==2 {print $1}' || true)
   if [[ -z "$key_id" ]]; then
     warn "no SSH key found in 1Password — create one in the GUI (New Item → SSH Key) and re-run."
     return
