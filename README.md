@@ -12,7 +12,9 @@
 | 📁 [fd](https://github.com/sharkdp/fd) | Fast file finder |
 | 🐙 [gh](https://cli.github.com) | GitHub CLI |
 | 🎬 [ffmpeg](https://ffmpeg.org) | Audio/video processing |
-| 🟢 [node@24](https://nodejs.org) | JavaScript runtime (pnpm via Corepack) |
+| 📦 [mise](https://mise.jdx.dev) | Per-project runtime manager (node, python, etc.) |
+| 🔨 [xcodes](https://github.com/XcodesOrg/xcodes) | Install/switch Xcode versions |
+| ⚡ [aria2](https://aria2.github.io) | Parallel downloads (used by `xcodes`) |
 
 ## 📂 Layout
 
@@ -34,11 +36,18 @@ zsh/        ~/.zshrc
 brew bundle --file=./Brewfile
 ```
 
-`node@24` is keg-only; the shell rc puts it on `PATH` automatically. Enable Corepack-managed pnpm once:
+Install global defaults for Node and pnpm:
 
 ```bash
-corepack enable
-corepack prepare pnpm@latest --activate
+mise use -g node@lts pnpm@latest
+```
+
+Per-project versions: drop a `mise.toml` in the repo root pinning whatever the project needs (e.g. `node = "lts"`, `pnpm = "11.1.1"`, `go = "1.26"`). `mise` switches automatically on `cd` — run `mise install` once to materialize the versions, and `mise trust` the first time you enter a new repo.
+
+Install Xcode (kept out of the Brewfile because it's ~10GB+ and prompts for an Apple ID):
+
+```bash
+xcodes install --latest --select
 ```
 
 ### 2. Stow each package

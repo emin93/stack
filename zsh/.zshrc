@@ -39,12 +39,8 @@ bindkey -e
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
 
-# Node (keg-only Homebrew node@24)
-if command -v brew >/dev/null 2>&1; then
-  _node_prefix="$(brew --prefix node@24 2>/dev/null)"
-  [[ -n "$_node_prefix" && -d "$_node_prefix/bin" ]] && export PATH="$_node_prefix/bin:$PATH"
-  unset _node_prefix
-fi
+# mise — manages node/python/etc per project (reads .tool-versions / mise.toml)
+command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
 
 # Per-host overrides (secrets, machine-specific tweaks)
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
