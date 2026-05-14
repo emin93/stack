@@ -70,12 +70,16 @@ step_xcode_clt() {
     return
   fi
   xcode-select --install || true
-  printf "    Waiting for CLT install to finish (a GUI dialog will appear)"
   until xcode-select -p >/dev/null 2>&1; do
-    printf "."
-    sleep 5
+    local reply
+    warn "Xcode Command Line Tools are required before the install can continue."
+    printf "    Complete the Apple installer dialog that opened.\n"
+    read -rp "    Press Enter once installed, or type 'skip' to stop here: " reply
+    if [[ "$reply" == "skip" ]]; then
+      die "Xcode Command Line Tools are required for git, Homebrew, and builds."
+    fi
+    xcode-select --install >/dev/null 2>&1 || true
   done
-  printf "\n"
   ok "installed."
 }
 
@@ -103,6 +107,8 @@ step_clone_repo() {
     fi
     git -C "$REPO_DIR" pull --ff-only
     ok "updated."
+  elif [[ -e "$REPO_DIR" && -n "$(ls -A "$REPO_DIR" 2>/dev/null || true)" ]]; then
+    die "$REPO_DIR exists and is not empty; move it aside and re-run."
   else
     git clone "$REPO_URL" "$REPO_DIR"
     ok "cloned."
@@ -111,7 +117,9 @@ step_clone_repo() {
 
 step_brew_bundle() {
   step "Brew bundle"
-  HOMEBREW_CASK_OPTS="--adopt" brew bundle --file="$REPO_DIR/Brewfile"
+  if ! HOMEBREW_CASK_OPTS="--adopt" brew bundle --file="$REPO_DIR/Brewfile"; then
+    die "brew bundle failed; fix the Homebrew error above and re-run the installer."
+  fi
 }
 
 step_pnpm_global() {
@@ -127,6 +135,7 @@ step_pnpm_global() {
   # Match the PNPM_HOME exported by zsh/.zshrc so pnpm add -g works before
   # the stowed shell config is loaded.
   export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
+  mkdir -p "$PNPM_HOME"
   export PATH="$PNPM_HOME/bin:$PATH"
   local installed
   installed=$(pnpm ls -g --depth=0 --parseable 2>/dev/null || true)
@@ -134,8 +143,11 @@ step_pnpm_global() {
     if grep -Fq "/${pkg}" <<<"$installed"; then
       ok "$pkg already installed."
     else
-      pnpm add -g "$pkg"
-      ok "installed $pkg."
+      if pnpm add -g "$pkg"; then
+        ok "installed $pkg."
+      else
+        warn "couldn't install pnpm global package '$pkg'; re-run when pnpm is ready."
+      fi
     fi
   done
 }
@@ -158,13 +170,60 @@ step_zed_cli() {
 
 step_gh_auth() {
   step "GitHub auth"
+  if ! command -v gh >/dev/null 2>&1; then
+    warn "gh CLI not on PATH; skipping GitHub auth."
+    return
+  fi
   if gh auth status >/dev/null 2>&1; then
     ok "already authenticated."
   else
-    gh auth login --web --git-protocol https
+    warn "GitHub CLI needs an interactive browser login."
+    if ! gh auth login --web --git-protocol https; then
+      warn "GitHub auth didn't complete; SSH upload and repo SSH switch may be skipped."
+      return
+    fi
+    if ! gh auth status >/dev/null 2>&1; then
+      warn "GitHub auth still isn't ready; re-run when logged in."
+      return
+    fi
   fi
-  gh auth setup-git
-  ok "git credential helper configured."
+  if gh auth setup-git; then
+    ok "git credential helper configured."
+  else
+    warn "couldn't configure gh as the git credential helper."
+  fi
+}
+
+step_1password_ready() {
+  step "1Password sign-in and CLI integration"
+
+  if ! command -v op >/dev/null 2>&1; then
+    warn "1Password CLI (op) not on PATH; later 1Password steps will be skipped."
+    return
+  fi
+
+  local agent_socket="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+  local reply
+
+  while true; do
+    warn "1Password needs a one-time GUI setup before the CLI steps can run."
+    printf "    1) Open 1Password and sign in/unlock the app.\n"
+    printf "    2) Settings → Developer → enable 'Integrate with 1Password CLI'.\n"
+    printf "    3) Settings → Developer → enable 'Use the SSH agent'.\n"
+    printf "    4) Make sure you have an SSH Key item in 1Password for this Mac.\n"
+    read -rp "    Press Enter once ready, or type 'skip' to continue without 1Password setup: " reply
+    if [[ "$reply" == "skip" ]]; then
+      warn "continuing without verified 1Password CLI/SSH agent setup."
+      return
+    fi
+
+    if op whoami >/dev/null 2>&1 && [[ -S "$agent_socket" ]]; then
+      ok "1Password is signed in, CLI integration works, and the SSH agent is running."
+      return
+    fi
+
+    warn "couldn't verify 1Password yet; check the settings above and try again."
+  done
 }
 
 step_1password_ssh() {
@@ -174,6 +233,19 @@ step_1password_ssh() {
   local ssh_dir="${HOME}/.ssh"
   local ssh_config="${ssh_dir}/config"
   local marker="# 1Password SSH agent (managed by install.sh)"
+
+  if ! command -v op >/dev/null 2>&1; then
+    warn "1Password CLI (op) not on PATH; skipping SSH agent wiring."
+    return
+  fi
+  if ! op whoami >/dev/null 2>&1; then
+    warn "1Password CLI isn't signed in; skipping SSH agent wiring."
+    return
+  fi
+  if [[ ! -S "$agent_socket" ]]; then
+    warn "1Password SSH agent isn't running; skipping SSH agent wiring."
+    return
+  fi
 
   mkdir -p "$ssh_dir" && chmod 700 "$ssh_dir"
   touch "$ssh_config" && chmod 600 "$ssh_config"
@@ -185,16 +257,8 @@ step_1password_ssh() {
     ok "~/.ssh/config already references the 1Password agent."
   fi
 
-  if [[ ! -S "$agent_socket" ]]; then
-    warn "1Password SSH agent isn't running yet."
-    printf "    1) Open 1Password, sign in.\n"
-    printf "    2) Settings → Developer → enable 'Use the SSH agent'.\n"
-    printf "    3) Same panel → enable 'Integrate with 1Password CLI'.\n"
-    read -rp "    Press Enter once those are on... " _
-  fi
-
-  if ! command -v op >/dev/null 2>&1; then
-    warn "1Password CLI (op) not on PATH; upload your public key to GitHub by hand."
+  if ! command -v gh >/dev/null 2>&1 || ! gh auth status >/dev/null 2>&1; then
+    warn "GitHub CLI isn't authenticated; upload your public key to GitHub by hand or re-run."
     return
   fi
 
@@ -216,14 +280,20 @@ step_1password_ssh() {
   if gh api /user/keys --jq '.[].key' 2>/dev/null | grep -Fxq "$pubkey"; then
     ok "1Password key already on GitHub (auth)."
   else
-    printf '%s\n' "$pubkey" | gh ssh-key add - --title "$title" --type authentication
-    ok "uploaded 1Password key to GitHub (auth)."
+    if printf '%s\n' "$pubkey" | gh ssh-key add - --title "$title" --type authentication; then
+      ok "uploaded 1Password key to GitHub (auth)."
+    else
+      warn "couldn't upload 1Password key to GitHub for auth."
+    fi
   fi
   if gh api /user/ssh_signing_keys --jq '.[].key' 2>/dev/null | grep -Fxq "$pubkey"; then
     ok "1Password key already on GitHub (signing)."
   else
-    printf '%s\n' "$pubkey" | gh ssh-key add - --title "$title" --type signing
-    ok "uploaded 1Password key to GitHub (signing)."
+    if printf '%s\n' "$pubkey" | gh ssh-key add - --title "$title" --type signing; then
+      ok "uploaded 1Password key to GitHub (signing)."
+    else
+      warn "couldn't upload 1Password key to GitHub for signing."
+    fi
   fi
 }
 
@@ -248,8 +318,12 @@ step_stow() {
   step "Stow configs"
   for target in "${STOW_TARGETS[@]}"; do
     if [[ -e "$target" && ! -L "$target" ]]; then
-      mv "$target" "${target}.pre-install.bak"
-      warn "backed up $target -> ${target}.pre-install.bak"
+      local backup="${target}.pre-install.bak"
+      if [[ -e "$backup" || -L "$backup" ]]; then
+        backup="${target}.pre-install.$(date +%Y%m%d%H%M%S).bak"
+      fi
+      mv "$target" "$backup"
+      warn "backed up $target -> $backup"
     fi
   done
   mkdir -p "${HOME}/.config" "${HOME}/.local/bin" "${HOME}/.claude" "${HOME}/.codex"
@@ -296,6 +370,14 @@ step_secrets_from_1password() {
   step "Sync secrets from 1Password to ~/.zshrc.local"
   if ! command -v op >/dev/null 2>&1; then
     warn "1Password CLI (op) not on PATH; skipping."
+    return
+  fi
+  if ! op whoami >/dev/null 2>&1; then
+    warn "1Password CLI isn't signed in; skipping."
+    return
+  fi
+  if ! command -v jq >/dev/null 2>&1; then
+    warn "jq not on PATH; skipping 1Password secret sync."
     return
   fi
   if ! op item get "$OP_ENV_ITEM" --format=json >/dev/null 2>&1; then
@@ -346,11 +428,23 @@ step_mcp_servers() {
     warn "claude CLI not on PATH; skipping browser-mcp registration."
     return
   fi
+  if ! claude auth status >/dev/null 2>&1; then
+    warn "Claude Code isn't signed in; skipping browser-mcp registration."
+    return
+  fi
+  if ! command -v mcp-server-browsermcp >/dev/null 2>&1; then
+    warn "browser-mcp server not on PATH; skipping Claude MCP registration."
+    return
+  fi
   if claude mcp list 2>/dev/null | grep -q '^browser-mcp:'; then
     ok "browser-mcp already registered with Claude Code."
   else
-    claude mcp add --scope user browser-mcp -- mcp-server-browsermcp
-    ok "registered browser-mcp with Claude Code."
+    if claude mcp add --scope user browser-mcp -- mcp-server-browsermcp; then
+      ok "registered browser-mcp with Claude Code."
+    else
+      warn "couldn't register browser-mcp with Claude Code."
+      return
+    fi
   fi
   warn "Browser MCP needs the Chrome extension: https://chromewebstore.google.com/detail/browser-mcp/bjfgambnhccakkhmkepdoekmckoijdlc"
   printf "    Install it, then click its toolbar icon → 'Connect' on the tab you want to control.\n"
@@ -361,12 +455,23 @@ step_xcode() {
   local xcode_app="/Applications/Xcode.app"
   local receipt="$xcode_app/Contents/_MASReceipt/receipt"
   if [[ -d "$xcode_app" && -f "$receipt" ]]; then
-    sudo xcode-select -s "$xcode_app"
-    ok "already installed and selected."
+    if sudo xcode-select -s "$xcode_app"; then
+      ok "already installed and selected."
+    else
+      warn "Xcode is installed, but xcode-select failed."
+    fi
     return
   fi
   if ! command -v mas >/dev/null 2>&1; then
     warn "mas not installed (expected from Brewfile); skipping."
+    return
+  fi
+  local reply
+  warn "Xcode installs through the Mac App Store and requires an Apple ID sign-in."
+  open -a "App Store" >/dev/null 2>&1 || true
+  read -rp "    Sign in to the App Store, then press Enter to install Xcode (or type 'skip'): " reply
+  if [[ "$reply" == "skip" ]]; then
+    warn "skipping Xcode install."
     return
   fi
   # mas needs root to drop the App Store receipt into the root-owned bundle.
@@ -405,6 +510,7 @@ STEPS=(
   step_pnpm_global
   step_zed_cli
   step_gh_auth
+  step_1password_ready
   step_1password_ssh
   step_repo_remote_ssh
   step_local_overrides
