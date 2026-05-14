@@ -15,8 +15,11 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(git zsh zed)
-PNPM_GLOBAL=(postiz wrangler)
+STOW_PACKAGES=(git zsh zed claude codex bin)
+PNPM_GLOBAL=(postiz wrangler @browsermcp/mcp @paddle/paddle-mcp)
+OP_ENV_ITEM="stack env"
+OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
+OP_ENV_MARKER_END="# <<< stack: 1password-managed env <<<"
 
 LOCAL_OVERRIDES=(
   "${HOME}/.gitconfig.local"
@@ -27,6 +30,10 @@ STOW_TARGETS=(
   "${HOME}/.gitconfig"
   "${HOME}/.zshrc"
   "${HOME}/.config/zed/settings.json"
+  "${HOME}/.claude/settings.json"
+  "${HOME}/.codex/config.toml"
+  "${HOME}/.local/bin/paddle-sandbox"
+  "${HOME}/.local/bin/paddle-prod"
 )
 
 # ---- helpers ----------------------------------------------------------------
@@ -245,7 +252,7 @@ step_stow() {
       warn "backed up $target -> ${target}.pre-install.bak"
     fi
   done
-  mkdir -p "${HOME}/.config"
+  mkdir -p "${HOME}/.config" "${HOME}/.local/bin" "${HOME}/.claude" "${HOME}/.codex"
   stow --target="$HOME" --dir="$REPO_DIR" --restow "${STOW_PACKAGES[@]}"
   ok "stowed: ${STOW_PACKAGES[*]}"
 }
@@ -272,24 +279,6 @@ step_claude_signin() {
   claude auth login || warn "claude auth login didn't complete; re-run when ready."
 }
 
-step_claude_settings() {
-  step "Claude Code default mode"
-  local settings_file="${HOME}/.claude/settings.json"
-  mkdir -p "$(dirname "$settings_file")"
-  [[ -f "$settings_file" ]] || echo '{}' > "$settings_file"
-  python3 - "$settings_file" <<'PY'
-import json, sys
-path = sys.argv[1]
-with open(path) as f:
-    settings = json.load(f)
-settings.setdefault("permissions", {})["defaultMode"] = "bypassPermissions"
-with open(path, "w") as f:
-    json.dump(settings, f, indent=2)
-    f.write("\n")
-PY
-  ok "permissions.defaultMode = bypassPermissions"
-}
-
 step_codex_signin() {
   step "Codex sign-in"
   if ! command -v codex >/dev/null 2>&1; then
@@ -303,34 +292,68 @@ step_codex_signin() {
   codex login || warn "codex login didn't complete; re-run when ready."
 }
 
-step_codex_settings() {
-  step "Codex default mode"
-  local config_file="${HOME}/.codex/config.toml"
-  mkdir -p "$(dirname "$config_file")"
-  touch "$config_file"
-  python3 - "$config_file" <<'PY'
-import re, sys, pathlib
+step_secrets_from_1password() {
+  step "Sync secrets from 1Password to ~/.zshrc.local"
+  if ! command -v op >/dev/null 2>&1; then
+    warn "1Password CLI (op) not on PATH; skipping."
+    return
+  fi
+  if ! op item get "$OP_ENV_ITEM" --format=json >/dev/null 2>&1; then
+    warn "1Password item '$OP_ENV_ITEM' not found."
+    printf "    Create a Secure Note named '%s' with each secret as a concealed field\n" "$OP_ENV_ITEM"
+    printf "    whose label is the env var name (e.g. PADDLE_SANDBOX_API_KEY).\n"
+    return
+  fi
+  local exports
+  exports=$(op item get "$OP_ENV_ITEM" --format=json \
+    | jq -r '.fields[] | select(.value != null and ((.label // "") | test("^[A-Z_][A-Z0-9_]*$"))) | "export \(.label)=\(.value|@sh)"')
+  if [[ -z "$exports" ]]; then
+    warn "no env-var-style fields on '$OP_ENV_ITEM' (labels must be UPPER_SNAKE_CASE)."
+    return
+  fi
+  local zshrc_local="${HOME}/.zshrc.local"
+  touch "$zshrc_local"
+  chmod 600 "$zshrc_local"
+  EXPORTS_BLOCK="$exports" \
+  MARKER_BEGIN="$OP_ENV_MARKER_BEGIN" \
+  MARKER_END="$OP_ENV_MARKER_END" \
+  python3 - "$zshrc_local" <<'PY'
+import os, re, sys, pathlib
 path = pathlib.Path(sys.argv[1])
-content = path.read_text()
-
-def set_top_key(text, key, value):
-    line = f"{key} = {value}\n"
-    section = re.search(r"^\[", text, flags=re.MULTILINE)
-    head, tail = (text[:section.start()], text[section.start():]) if section else (text, "")
-    pat = re.compile(rf"^{re.escape(key)}\s*=.*\n?", flags=re.MULTILINE)
-    if pat.search(head):
-        head = pat.sub(line, head)
-    else:
-        if head and not head.endswith("\n"):
-            head += "\n"
-        head += line
-    return head + tail
-
-content = set_top_key(content, "approval_policy", '"never"')
-content = set_top_key(content, "sandbox_mode", '"danger-full-access"')
+beg = os.environ["MARKER_BEGIN"]
+end = os.environ["MARKER_END"]
+body = os.environ["EXPORTS_BLOCK"].rstrip()
+block = f"{beg}\n{body}\n{end}\n"
+content = path.read_text() if path.exists() else ""
+pat = re.compile(re.escape(beg) + r"[\s\S]*?" + re.escape(end) + r"\n?")
+if pat.search(content):
+    content = pat.sub(block, content)
+else:
+    if content and not content.endswith("\n"):
+        content += "\n"
+    content += "\n" + block
 path.write_text(content)
 PY
-  ok "approval_policy=never, sandbox_mode=danger-full-access"
+  ok "wrote $(grep -c '^export ' <<<"$exports") secret(s) to ~/.zshrc.local"
+}
+
+step_mcp_servers() {
+  step "MCP servers"
+  # Codex picks browser-mcp up from the stowed ~/.codex/config.toml.
+  # Claude Code stores MCP servers in ~/.claude.json (a state file we can't
+  # stow), so register via the CLI instead. Idempotent.
+  if ! command -v claude >/dev/null 2>&1; then
+    warn "claude CLI not on PATH; skipping browser-mcp registration."
+    return
+  fi
+  if claude mcp list 2>/dev/null | grep -q '^browser-mcp:'; then
+    ok "browser-mcp already registered with Claude Code."
+  else
+    claude mcp add --scope user browser-mcp -- mcp-server-browsermcp
+    ok "registered browser-mcp with Claude Code."
+  fi
+  warn "Browser MCP needs the Chrome extension: https://chromewebstore.google.com/detail/browser-mcp/bjfgambnhccakkhmkepdoekmckoijdlc"
+  printf "    Install it, then click its toolbar icon → 'Connect' on the tab you want to control.\n"
 }
 
 step_xcode() {
@@ -386,10 +409,10 @@ STEPS=(
   step_repo_remote_ssh
   step_local_overrides
   step_stow
+  step_secrets_from_1password
   step_claude_signin
-  step_claude_settings
   step_codex_signin
-  step_codex_settings
+  step_mcp_servers
   step_xcode
 )
 STEP_TOTAL=${#STEPS[@]}

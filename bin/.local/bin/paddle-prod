@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Wrapper: spawn the Paddle MCP server pointed at the production environment.
+# Reads PADDLE_PROD_API_KEY from the calling env (set it in ~/.zshrc.local).
+set -euo pipefail
+: "${PADDLE_PROD_API_KEY:?PADDLE_PROD_API_KEY not set — add it to ~/.zshrc.local}"
+export PADDLE_API_KEY="$PADDLE_PROD_API_KEY"
+export PADDLE_ENVIRONMENT="production"
+exec paddle "$@"

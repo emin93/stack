@@ -1,0 +1,13 @@
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[mcp_servers.browser-mcp]
+command = "mcp-server-browsermcp"
+
+[mcp_servers.paddle]
+command = "paddle-sandbox"
+env_vars = ["PADDLE_SANDBOX_API_KEY"]
+
+[mcp_servers.paddle-prod]
+command = "paddle-prod"
+env_vars = ["PADDLE_PROD_API_KEY"]

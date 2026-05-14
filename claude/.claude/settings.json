@@ -1,0 +1,16 @@
+{
+  "model": "opus",
+  "enabledPlugins": {
+    "swift-lsp@claude-plugins-official": true
+  },
+  "effortLevel": "high",
+  "skipDangerousModePermissionPrompt": true,
+  "agentPushNotifEnabled": true,
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  }
+}
