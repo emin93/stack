@@ -10,6 +10,9 @@
     "single_file_review": true,
   },
   "agent_servers": {
+    "github-copilot-cli": {
+      "type": "registry"
+    },
     "claude-acp": {
       "type": "registry",
     },
