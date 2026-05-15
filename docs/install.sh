@@ -20,6 +20,7 @@ PNPM_GLOBAL=(postiz wrangler @browsermcp/mcp @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
 OP_ENV_MARKER_END="# <<< stack: 1password-managed env <<<"
+DJAY_APP_ID="450527929"
 
 LOCAL_OVERRIDES=(
   "${HOME}/.gitconfig.local"
@@ -491,6 +492,31 @@ step_mcp_servers() {
   printf "    Install it, then click its toolbar icon → 'Connect' on the tab you want to control.\n"
 }
 
+step_djay_pro() {
+  step "djay Pro"
+  if ! command -v mas >/dev/null 2>&1; then
+    warn "mas not installed (expected from Brewfile); skipping."
+    return
+  fi
+  if mas list 2>/dev/null | awk '{print $1}' | grep -Fxq "$DJAY_APP_ID"; then
+    ok "already installed."
+    return
+  fi
+  local reply
+  warn "djay Pro installs through the Mac App Store and requires an Apple ID sign-in."
+  open -a "App Store" >/dev/null 2>&1 || true
+  read -rp "    Sign in to the App Store, then press Enter to install djay Pro (or type 'skip'): " reply
+  if [[ "$reply" == "skip" ]]; then
+    warn "skipping djay Pro install."
+    return
+  fi
+  if ! mas install "$DJAY_APP_ID"; then
+    warn "mas install failed (signed in to the App Store?); re-run when ready."
+    return
+  fi
+  ok "djay Pro installed."
+}
+
 step_xcode() {
   step "Xcode (latest)"
   local xcode_app="/Applications/Xcode.app"
@@ -561,6 +587,7 @@ STEPS=(
   step_claude_signin
   step_codex_signin
   step_mcp_servers
+  step_djay_pro
   step_xcode
 )
 STEP_TOTAL=${#STEPS[@]}
