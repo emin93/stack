@@ -1,0 +1,41 @@
+format = """
+[](bold #f8f8f2) [](bold #d6a84f) $directory
+[❯](bold #7ccf64) """
+
+add_newline = true
+
+[directory]
+format = "[$path]($style) "
+style = "bold #d6a84f"
+truncation_length = 4
+truncate_to_repo = false
+
+[character]
+disabled = true
+
+[git_branch]
+disabled = true
+
+[git_status]
+disabled = true
+
+[cmd_duration]
+disabled = true
+
+[package]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[python]
+disabled = true
+
+[rust]
+disabled = true
+
+[golang]
+disabled = true
+
+[docker_context]
+disabled = true

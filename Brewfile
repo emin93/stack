@@ -2,6 +2,7 @@ tap "jundot/omlx", "https://github.com/jundot/omlx"
 
 # CLI tools
 brew "stow"
+brew "starship"
 brew "ripgrep"
 brew "fd"
 brew "gh"
@@ -15,6 +16,9 @@ brew "aria2"
 brew "tokei"
 brew "webp"
 brew "jundot/omlx/omlx"
+
+# Fonts
+cask "font-jetbrains-mono-nerd-font"
 
 # Language servers (Zed)
 brew "xcode-build-server"

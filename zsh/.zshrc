@@ -40,3 +40,6 @@ bindkey '^[[B' history-search-forward
 
 # Per-host overrides (secrets, machine-specific tweaks)
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# Prompt
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"

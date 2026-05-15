@@ -15,7 +15,7 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(git zsh zed claude codex bin)
+STOW_PACKAGES=(git zsh starship zed claude codex bin)
 PNPM_GLOBAL=(postiz wrangler @browsermcp/mcp @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -28,7 +28,9 @@ LOCAL_OVERRIDES=(
 
 STOW_TARGETS=(
   "${HOME}/.gitconfig"
+  "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
+  "${HOME}/.config/starship.toml"
   "${HOME}/.config/zed/settings.json"
   "${HOME}/.claude/settings.json"
   "${HOME}/.codex/config.toml"
@@ -331,6 +333,45 @@ step_stow() {
   ok "stowed: ${STOW_PACKAGES[*]}"
 }
 
+step_terminal_settings() {
+  step "Terminal.app profile"
+  if ! osascript <<'APPLESCRIPT'
+tell application "Terminal"
+  if not (exists settings set "Clear Dark") then
+    make new settings set with properties {name:"Clear Dark"}
+  end if
+  set profile to settings set "Clear Dark"
+  set font name of profile to "JetBrainsMonoNFM-Regular"
+  set font size of profile to 13
+  set background color of profile to {4369, 4369, 4112}
+  set normal text color of profile to {56540, 56540, 56540}
+  set bold text color of profile to {65535, 65535, 65535}
+  set cursor color of profile to {24929, 45055, 61423}
+  set default settings to profile
+  set startup settings to profile
+  if (count of windows) > 0 then
+    set current settings of front window to profile
+  end if
+end tell
+APPLESCRIPT
+  then
+    warn "couldn't update Terminal.app profile; set the Terminal font to JetBrainsMono Nerd Font Mono manually."
+    return
+  fi
+  local terminal_plist="${HOME}/Library/Preferences/com.apple.Terminal.plist"
+  if [[ -f "$terminal_plist" ]]; then
+    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundAlpha 1' "$terminal_plist" 2>/dev/null \
+      || /usr/libexec/PlistBuddy -c 'Add :"Window Settings":"Clear Dark":BackgroundAlpha real 1' "$terminal_plist"
+    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundAlphaInactive 1' "$terminal_plist" 2>/dev/null \
+      || /usr/libexec/PlistBuddy -c 'Add :"Window Settings":"Clear Dark":BackgroundAlphaInactive real 1' "$terminal_plist"
+    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundBlur 0' "$terminal_plist" 2>/dev/null || true
+    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundBlurInactive 0' "$terminal_plist" 2>/dev/null || true
+    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundSettingsForInactiveWindows false' "$terminal_plist" 2>/dev/null || true
+    killall cfprefsd 2>/dev/null || true
+  fi
+  ok "Terminal.app uses JetBrainsMono Nerd Font Mono."
+}
+
 step_local_overrides() {
   step "Local override files"
   for f in "${LOCAL_OVERRIDES[@]}"; do
@@ -515,6 +556,7 @@ STEPS=(
   step_repo_remote_ssh
   step_local_overrides
   step_stow
+  step_terminal_settings
   step_secrets_from_1password
   step_claude_signin
   step_codex_signin
