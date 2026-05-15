@@ -1,8 +1,8 @@
 {
   "agent": {
     "commit_message_model": {
-      "model": "gpt-5-mini",
-      "provider": "copilot_chat",
+      "model": "gpt-5.4-mini",
+      "provider": "openai-subscribed",
     },
     "dock": "left",
     "play_sound_when_agent_done": "when_hidden",
@@ -48,7 +48,7 @@
     "button": false,
   },
   "edit_predictions": {
-    "provider": "copilot",
+    "provider": "zed",
   },
   "file_types": {
     "JSON": ["xcstrings"],
