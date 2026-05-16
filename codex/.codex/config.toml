@@ -1,10 +1,5 @@
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
-model = "gpt-5.5"
-model_reasoning_effort = "high"
-
-[mcp_servers.browser-mcp]
-command = "mcp-server-browsermcp"
 
 [mcp_servers.paddle]
 command = "paddle-sandbox"
@@ -14,14 +9,5 @@ env_vars = ["PADDLE_SANDBOX_API_KEY"]
 command = "paddle-prod"
 env_vars = ["PADDLE_PROD_API_KEY"]
 
-[projects."/Users/eminkhateeb"]
-trust_level = "trusted"
-
 [projects."/Users/eminkhateeb/Documents/Projects/clindesk"]
 trust_level = "trusted"
-
-[plugins."github@openai-curated"]
-enabled = true
-
-[tui.model_availability_nux]
-"gpt-5.5" = 4

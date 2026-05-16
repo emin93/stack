@@ -15,8 +15,8 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(git zsh starship zed claude codex bin)
-PNPM_GLOBAL=(postiz wrangler @browsermcp/mcp @paddle/paddle-mcp)
+STOW_PACKAGES=(git zsh claude codex bin)
+PNPM_GLOBAL=(postiz wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
 OP_ENV_MARKER_END="# <<< stack: 1password-managed env <<<"
@@ -31,8 +31,6 @@ STOW_TARGETS=(
   "${HOME}/.gitconfig"
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
-  "${HOME}/.config/starship.toml"
-  "${HOME}/.config/zed/settings.json"
   "${HOME}/.claude/settings.json"
   "${HOME}/.codex/config.toml"
   "${HOME}/.local/bin/paddle-sandbox"
@@ -153,22 +151,6 @@ step_pnpm_global() {
       fi
     fi
   done
-}
-
-step_zed_cli() {
-  step "Zed CLI"
-  local zed_cli="/Applications/Zed.app/Contents/MacOS/cli"
-  local target="/opt/homebrew/bin/zed"
-  if [[ ! -x "$zed_cli" ]]; then
-    warn "Zed.app not found at /Applications; skipping."
-    return
-  fi
-  if [[ -L "$target" && "$(readlink "$target")" == "$zed_cli" ]]; then
-    ok "already linked at $target."
-    return
-  fi
-  ln -sf "$zed_cli" "$target"
-  ok "linked $target -> $zed_cli"
 }
 
 step_gh_auth() {
@@ -334,45 +316,6 @@ step_stow() {
   ok "stowed: ${STOW_PACKAGES[*]}"
 }
 
-step_terminal_settings() {
-  step "Terminal.app profile"
-  if ! osascript <<'APPLESCRIPT'
-tell application "Terminal"
-  if not (exists settings set "Clear Dark") then
-    make new settings set with properties {name:"Clear Dark"}
-  end if
-  set profile to settings set "Clear Dark"
-  set font name of profile to "JetBrainsMonoNFM-Regular"
-  set font size of profile to 13
-  set background color of profile to {4369, 4369, 4112}
-  set normal text color of profile to {56540, 56540, 56540}
-  set bold text color of profile to {65535, 65535, 65535}
-  set cursor color of profile to {24929, 45055, 61423}
-  set default settings to profile
-  set startup settings to profile
-  if (count of windows) > 0 then
-    set current settings of front window to profile
-  end if
-end tell
-APPLESCRIPT
-  then
-    warn "couldn't update Terminal.app profile; set the Terminal font to JetBrainsMono Nerd Font Mono manually."
-    return
-  fi
-  local terminal_plist="${HOME}/Library/Preferences/com.apple.Terminal.plist"
-  if [[ -f "$terminal_plist" ]]; then
-    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundAlpha 1' "$terminal_plist" 2>/dev/null \
-      || /usr/libexec/PlistBuddy -c 'Add :"Window Settings":"Clear Dark":BackgroundAlpha real 1' "$terminal_plist"
-    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundAlphaInactive 1' "$terminal_plist" 2>/dev/null \
-      || /usr/libexec/PlistBuddy -c 'Add :"Window Settings":"Clear Dark":BackgroundAlphaInactive real 1' "$terminal_plist"
-    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundBlur 0' "$terminal_plist" 2>/dev/null || true
-    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundBlurInactive 0' "$terminal_plist" 2>/dev/null || true
-    /usr/libexec/PlistBuddy -c 'Set :"Window Settings":"Clear Dark":BackgroundSettingsForInactiveWindows false' "$terminal_plist" 2>/dev/null || true
-    killall cfprefsd 2>/dev/null || true
-  fi
-  ok "Terminal.app uses JetBrainsMono Nerd Font Mono."
-}
-
 step_local_overrides() {
   step "Local override files"
   for f in "${LOCAL_OVERRIDES[@]}"; do
@@ -383,7 +326,7 @@ step_local_overrides() {
 }
 
 step_claude_signin() {
-  step "Claude Code sign-in"
+  step "Claude sign-in"
   if ! command -v claude >/dev/null 2>&1; then
     warn "claude CLI not on PATH yet. Open a new shell after this finishes and run 'claude auth login'."
     return
@@ -461,35 +404,38 @@ PY
   ok "wrote $(grep -c '^export ' <<<"$exports") secret(s) to ~/.zshrc.local"
 }
 
-step_mcp_servers() {
-  step "MCP servers"
-  # Codex picks browser-mcp up from the stowed ~/.codex/config.toml.
-  # Claude Code stores MCP servers in ~/.claude.json (a state file we can't
-  # stow), so register via the CLI instead. Idempotent.
+step_claude_mcp_servers() {
+  step "Claude MCP servers"
+  export PATH="${HOME}/.local/bin:${PNPM_HOME:-$HOME/Library/pnpm}/bin:$PATH"
+
   if ! command -v claude >/dev/null 2>&1; then
-    warn "claude CLI not on PATH; skipping browser-mcp registration."
+    warn "claude CLI not on PATH; skipping Paddle MCP registration."
     return
   fi
   if ! claude auth status >/dev/null 2>&1; then
-    warn "Claude Code isn't signed in; skipping browser-mcp registration."
+    warn "Claude isn't signed in; skipping Paddle MCP registration."
     return
   fi
-  if ! command -v mcp-server-browsermcp >/dev/null 2>&1; then
-    warn "browser-mcp server not on PATH; skipping Claude MCP registration."
+  if ! command -v paddle >/dev/null 2>&1; then
+    warn "Paddle MCP package not on PATH; skipping Claude MCP registration."
     return
   fi
-  if claude mcp list 2>/dev/null | grep -q '^browser-mcp:'; then
-    ok "browser-mcp already registered with Claude Code."
+
+  if claude mcp list 2>/dev/null | grep -q '^paddle:'; then
+    ok "paddle already registered with Claude."
+  elif claude mcp add --scope user paddle -- paddle-sandbox; then
+    ok "registered paddle with Claude."
   else
-    if claude mcp add --scope user browser-mcp -- mcp-server-browsermcp; then
-      ok "registered browser-mcp with Claude Code."
-    else
-      warn "couldn't register browser-mcp with Claude Code."
-      return
-    fi
+    warn "couldn't register paddle with Claude."
   fi
-  warn "Browser MCP needs the Chrome extension: https://chromewebstore.google.com/detail/browser-mcp/bjfgambnhccakkhmkepdoekmckoijdlc"
-  printf "    Install it, then click its toolbar icon → 'Connect' on the tab you want to control.\n"
+
+  if claude mcp list 2>/dev/null | grep -q '^paddle-prod:'; then
+    ok "paddle-prod already registered with Claude."
+  elif claude mcp add --scope user paddle-prod -- paddle-prod; then
+    ok "registered paddle-prod with Claude."
+  else
+    warn "couldn't register paddle-prod with Claude."
+  fi
 }
 
 step_djay_pro() {
@@ -563,7 +509,7 @@ step_xcode() {
 step_summary() {
   header "Done"
   ok "${STEP_NUM}/${STEP_TOTAL} steps completed."
-  printf "    Open a new Terminal or Zed terminal to pick up the new shell environment.\n\n"
+  printf "    Open a new Terminal to pick up the new shell environment.\n\n"
 }
 
 # ---- main -------------------------------------------------------------------
@@ -575,18 +521,16 @@ STEPS=(
   step_clone_repo
   step_brew_bundle
   step_pnpm_global
-  step_zed_cli
   step_gh_auth
   step_1password_ready
   step_1password_ssh
   step_repo_remote_ssh
   step_local_overrides
   step_stow
-  step_terminal_settings
   step_secrets_from_1password
   step_claude_signin
   step_codex_signin
-  step_mcp_servers
+  step_claude_mcp_servers
   step_djay_pro
   step_xcode
 )

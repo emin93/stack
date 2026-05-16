@@ -6,11 +6,5 @@
   "permissions": {
     "defaultMode": "bypassPermissions"
   },
-  "model": "opus[1m]",
-  "enabledPlugins": {
-    "swift-lsp@claude-plugins-official": true
-  },
-  "effortLevel": "high",
-  "skipDangerousModePermissionPrompt": true,
-  "agentPushNotifEnabled": true
+  "skipDangerousModePermissionPrompt": true
 }

@@ -17,27 +17,19 @@ brew "tokei"
 brew "webp"
 brew "jundot/omlx/omlx"
 
-# Fonts
-cask "font-jetbrains-mono-nerd-font"
-
-# Language servers (Zed)
-brew "xcode-build-server"
-brew "kotlin-language-server"
-
 # iOS/macOS dev
 brew "xcbeautify"
 
 # Android dev
 cask "android-platform-tools"
 
-# Dev workspace
-cask "zed"
-
 # Native IDEs
 cask "android-studio"
 
 # AI
+cask "claude"
 cask "claude-code@latest"
+cask "codex-app"
 cask "codex"
 
 # Browser & security
