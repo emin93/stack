@@ -15,7 +15,7 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(git zsh bin cmux)
+STOW_PACKAGES=(git zsh bin)
 PNPM_GLOBAL=(postiz wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -38,7 +38,6 @@ STOW_TARGETS=(
   "${HOME}/.zshrc"
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
-  "${HOME}/.config/cmux/cmux.json"
 )
 
 # ---- helpers ----------------------------------------------------------------
@@ -315,7 +314,7 @@ step_stow() {
       warn "backed up $target -> $backup"
     fi
   done
-  mkdir -p "${HOME}/.config" "${HOME}/.config/cmux" "${HOME}/.local/bin" "${HOME}/.claude" "${HOME}/.codex"
+  mkdir -p "${HOME}/.config" "${HOME}/.local/bin" "${HOME}/.claude" "${HOME}/.codex"
   stow --target="$HOME" --dir="$REPO_DIR" --restow "${STOW_PACKAGES[@]}"
   ok "stowed: ${STOW_PACKAGES[*]}"
 }

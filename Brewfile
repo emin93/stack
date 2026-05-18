@@ -1,5 +1,4 @@
 tap "jundot/omlx", "https://github.com/jundot/omlx"
-tap "manaflow-ai/cmux"
 
 # CLI tools
 brew "stow"
@@ -29,7 +28,6 @@ cask "android-platform-tools"
 cask "android-studio"
 
 # AI
-cask "manaflow-ai/cmux/cmux"
 cask "claude-code@latest"
 cask "codex"
 
