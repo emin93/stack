@@ -372,6 +372,7 @@ step_local_overrides() {
 
 step_claude_signin() {
   step "Claude sign-in"
+  local reply
   if ! command -v claude >/dev/null 2>&1; then
     warn "claude CLI not on PATH yet. Open a new shell after this finishes and run 'claude auth login'."
     return
@@ -380,17 +381,28 @@ step_claude_signin() {
     ok "already signed in."
     return
   fi
+  read -rp "    Type 'login' to sign in to Claude now, or press Enter to skip: " reply
+  if [[ "$reply" != "login" ]]; then
+    warn "skipping Claude sign-in; run 'claude auth login' later."
+    return
+  fi
   claude auth login || warn "claude auth login didn't complete; re-run when ready."
 }
 
 step_codex_signin() {
   step "Codex sign-in"
+  local reply
   if ! command -v codex >/dev/null 2>&1; then
     warn "codex CLI not on PATH yet. Open a new shell after this finishes and run 'codex login'."
     return
   fi
   if codex login status >/dev/null 2>&1; then
     ok "already signed in."
+    return
+  fi
+  read -rp "    Type 'login' to sign in to Codex now, or press Enter to skip: " reply
+  if [[ "$reply" != "login" ]]; then
+    warn "skipping Codex sign-in; run 'codex login' later."
     return
   fi
   codex login || warn "codex login didn't complete; re-run when ready."
