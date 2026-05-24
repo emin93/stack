@@ -205,6 +205,7 @@ step_1password_ready() {
       return
     fi
 
+    op signin >/dev/null 2>&1 || true
     if op whoami >/dev/null 2>&1 && [[ -S "$agent_socket" ]]; then
       ok "1Password is signed in, CLI integration works, and the SSH agent is running."
       return
