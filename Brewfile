@@ -10,6 +10,7 @@ brew "pnpm"
 brew "go"
 brew "webp"
 brew "hf"
+brew "rclone"
 
 # iOS/macOS dev
 brew "xcbeautify"

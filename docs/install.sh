@@ -20,6 +20,8 @@ PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
 OP_ENV_MARKER_END="# <<< stack: 1password-managed env <<<"
+RCLONE_DRIVE_REMOTE="clindesk-drive"
+RCLONE_DRIVE_ROOT="ClinDesk/marketing-artifacts"
 
 APP_STORE_APPS=(
   "1Password for Safari"
@@ -123,6 +125,37 @@ step_brew_bundle() {
   step "Brew bundle"
   if ! HOMEBREW_CASK_OPTS="--adopt" brew bundle --file="$REPO_DIR/Brewfile"; then
     die "brew bundle failed; fix the Homebrew error above and re-run the installer."
+  fi
+}
+
+step_rclone_drive() {
+  step "Google Drive artifact remote"
+  if ! command -v rclone >/dev/null 2>&1; then
+    warn "rclone not on PATH; skipping Google Drive setup."
+    return
+  fi
+  if rclone listremotes 2>/dev/null | grep -Fxq "${RCLONE_DRIVE_REMOTE}:"; then
+    ok "${RCLONE_DRIVE_REMOTE} already configured."
+  else
+    local reply
+    warn "rclone needs a one-time Google Drive browser authorization."
+    printf "    This creates the '%s' remote for generated marketing artifacts.\n" "$RCLONE_DRIVE_REMOTE"
+    read -rp "    Press Enter to open the browser, or type 'skip': " reply
+    if [[ "$reply" == "skip" ]]; then
+      warn "skipping Google Drive rclone setup."
+      return
+    fi
+    if rclone config create "$RCLONE_DRIVE_REMOTE" drive scope drive; then
+      ok "configured ${RCLONE_DRIVE_REMOTE}."
+    else
+      warn "rclone Google Drive authorization did not complete; re-run when ready."
+      return
+    fi
+  fi
+  if rclone mkdir "${RCLONE_DRIVE_REMOTE}:${RCLONE_DRIVE_ROOT}"; then
+    ok "ensured ${RCLONE_DRIVE_REMOTE}:${RCLONE_DRIVE_ROOT}."
+  else
+    warn "couldn't ensure ${RCLONE_DRIVE_REMOTE}:${RCLONE_DRIVE_ROOT}."
   fi
 }
 
@@ -527,6 +560,7 @@ STEPS=(
   step_homebrew
   step_clone_repo
   step_brew_bundle
+  step_rclone_drive
   step_pnpm_global
   step_gh_auth
   step_1password_ready

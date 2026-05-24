@@ -584,6 +584,7 @@
       <span class="chip">pnpm</span>
       <span class="chip">go</span>
       <span class="chip">hf</span>
+      <span class="chip">rclone</span>
       <span class="chip">wrangler</span>
     </div>
 
@@ -598,6 +599,7 @@
     <div class="chips">
       <span class="chip"><span class="arrow">→</span>GitHub via <code>gh auth login</code></span>
       <span class="chip"><span class="arrow">→</span>SSH via 1Password agent (Touch ID), public key uploaded to GitHub</span>
+      <span class="chip"><span class="arrow">→</span>Google Drive artifact remote via <code>rclone</code></span>
       <span class="chip"><span class="arrow">→</span>Claude and Codex CLI sign-in launched for you</span>
       <span class="chip"><span class="arrow">→</span>Secrets pulled from a 1Password Secure Note into <code>~/.zshrc.local</code></span>
     </div>
@@ -611,6 +613,7 @@
       <li><strong>Homebrew</strong><em>Installs and wires up <code>brew shellenv</code>.</em></li>
       <li><strong>Clone the repo</strong><em>Uses HTTPS so it works before auth is set up.</em></li>
       <li><strong>Brew bundle</strong><em>Installs every tool and cask declared in the Brewfile.</em></li>
+      <li><strong>Google Drive artifact remote</strong><em>Configures the <code>clindesk-drive</code> rclone remote and ensures <code>ClinDesk/marketing-artifacts</code> exists.</em></li>
       <li><strong>pnpm globals</strong><em>Installs <code>wrangler</code> and <code>@paddle/paddle-mcp</code>.</em></li>
       <li><strong>GitHub auth</strong><em>Runs device-code login and sets <code>gh auth setup-git</code> as the credential helper.</em></li>
       <li><strong>1Password SSH agent</strong><em>Waits for the GUI integration and SSH agent to be enabled, wires <code>~/.ssh/config</code> to the agent, and uploads the public key to GitHub for SSH auth.</em></li>
@@ -631,6 +634,7 @@
         <li>Complete the Xcode Command Line Tools installer dialog</li>
         <li>Unlock 1Password and enable the CLI + SSH agent integrations</li>
         <li>Approve the <code>gh auth</code> browser flow</li>
+        <li>Approve the Google Drive <code>rclone</code> browser flow</li>
         <li>Sign in to <code>claude</code> and <code>codex</code> when each opens its browser</li>
         <li>Install 1Password for Safari, Wipr, and Xcode from the App Store when needed</li>
       </ul>
