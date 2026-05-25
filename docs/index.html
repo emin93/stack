@@ -313,10 +313,10 @@
     height: 22px;
     object-fit: contain;
   }
-  .tile-initials {
-    color: var(--accent);
-    font-size: 11px;
-    font-weight: 800;
+  .tile-icon-app img {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
   }
   .tile-body {
     display: flex;
@@ -532,7 +532,7 @@
 
     <div class="grid">
       <a class="tile" href="https://zed.dev" target="_blank" rel="noopener">
-        <span class="tile-icon tile-initials">Z</span>
+        <span class="tile-icon"><img src="https://cdn.simpleicons.org/zedindustries/1348DC" alt="" loading="lazy"></span>
         <span class="tile-body"><span class="tile-name">Zed</span><span class="tile-desc">AI code editor</span></span>
       </a>
       <a class="tile" href="https://openai.com/codex" target="_blank" rel="noopener">
@@ -540,8 +540,15 @@
         <span class="tile-body"><span class="tile-name">Codex</span><span class="tile-desc">CLI agent</span></span>
       </a>
       <a class="tile" href="https://omlx.ai" target="_blank" rel="noopener">
-        <span class="tile-icon tile-initials">MLX</span>
+        <span class="tile-icon tile-icon-app"><picture>
+          <source srcset="assets/icons/omlx-dark.svg" media="(prefers-color-scheme: dark)">
+          <img src="assets/icons/omlx-light.svg" alt="" loading="lazy">
+        </picture></span>
         <span class="tile-body"><span class="tile-name">oMLX</span><span class="tile-desc">Local model server</span></span>
+      </a>
+      <a class="tile" href="https://apps.apple.com/us/app/xcode/id497799835?mt=12" target="_blank" rel="noopener">
+        <span class="tile-icon"><img src="https://cdn.simpleicons.org/xcode/147EFB" alt="" loading="lazy"></span>
+        <span class="tile-body"><span class="tile-name">Xcode</span><span class="tile-desc">Manual App Store install</span></span>
       </a>
       <a class="tile" href="https://developer.android.com/studio" target="_blank" rel="noopener">
         <span class="tile-icon"><img src="https://cdn.simpleicons.org/androidstudio/3DDC84" alt="" loading="lazy"></span>
