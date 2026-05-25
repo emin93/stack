@@ -26,7 +26,7 @@
 	conflictStyle = zdiff3
 
 [core]
-	editor = cursor --wait
+	editor = open -W -a OpenCode
 
 [alias]
 	st = status -sb

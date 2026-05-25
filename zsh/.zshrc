@@ -1,5 +1,5 @@
 # Editor
-export EDITOR="cursor --wait"
+export EDITOR="open -W -a OpenCode"
 export VISUAL="$EDITOR"
 
 # 1Password SSH agent

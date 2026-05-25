@@ -23,11 +23,11 @@ cask "android-platform-tools"
 
 # Native IDEs
 cask "android-studio"
-cask "cursor"
 
 # AI
 brew "jundot/omlx/omlx"
 brew "opencode"
+cask "opencode-desktop"
 cask "codex"
 
 # Browser & security

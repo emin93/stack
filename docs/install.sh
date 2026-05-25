@@ -15,7 +15,7 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(git zsh cursor opencode bin)
+STOW_PACKAGES=(git zsh opencode bin)
 PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -40,8 +40,6 @@ STOW_TARGETS=(
   "${HOME}/.gitconfig"
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
-  "${HOME}/Library/Application Support/Cursor/User/settings.json"
-  "${HOME}/Library/Application Support/Cursor/User/tasks.json"
   "${HOME}/.config/opencode/opencode.json"
   "${HOME}/.local/bin/omlx-server"
   "${HOME}/.local/bin/paddle-sandbox"
