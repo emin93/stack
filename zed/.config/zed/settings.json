@@ -1,0 +1,67 @@
+{
+  "auto_install_extensions": {
+    "macos-classic": true,
+    "vscode-icons": true
+  },
+  "collaboration_panel": {
+    "button": false
+  },
+  "debugger": {
+    "button": false
+  },
+  "diagnostics": {
+    "button": false
+  },
+  "file_types": {
+    "JSON": ["xcstrings"]
+  },
+  "format_on_save": "on",
+  "git": {
+    "inline_blame": {
+      "enabled": true
+    }
+  },
+  "git_panel": {
+    "dock": "right"
+  },
+  "icon_theme": {
+    "dark": "VSCode Icons for Zed (Dark)",
+    "light": "VSCode Icons for Zed (Light)",
+    "mode": "system"
+  },
+  "language_models": {
+    "openai_compatible": {
+      "oMLX": {
+        "api_url": "http://127.0.0.1:8000/v1",
+        "available_models": [
+          {
+            "name": "Qwopus3.6-27B-v2-MLX-4bit",
+            "display_name": "Qwopus3.6 27B MLX 4bit",
+            "max_tokens": 32768,
+            "max_output_tokens": 8192,
+            "supports_tools": true,
+            "supports_images": false
+          }
+        ]
+      }
+    }
+  },
+  "outline_panel": {
+    "button": false
+  },
+  "project_panel": {
+    "dock": "right"
+  },
+  "tabs": {
+    "git_status": true
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "theme": {
+    "dark": "macOS Classic Dark",
+    "light": "macOS Classic Light",
+    "mode": "system"
+  }
+}

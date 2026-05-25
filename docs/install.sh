@@ -15,7 +15,7 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(git zsh bin)
+STOW_PACKAGES=(git zsh zed bin)
 PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -23,9 +23,7 @@ OP_ENV_MARKER_END="# <<< stack: 1password-managed env <<<"
 RCLONE_DRIVE_REMOTE="clindesk-drive"
 RCLONE_DRIVE_ROOT="ClinDesk/marketing-artifacts"
 OMLX_MODEL_REPO="Jackrong/Qwopus3.6-27B-v2-MLX-4bit"
-OMLX_MODEL_ID="Qwopus3.6-27B-v2-MLX-4bit"
 OMLX_MODEL_DIR="${HOME}/.omlx/models/${OMLX_MODEL_REPO}"
-OMLX_BASE_URL="http://localhost:8000/v1"
 
 APP_STORE_APPS=(
   "1Password for Safari"
@@ -42,9 +40,9 @@ STOW_TARGETS=(
   "${HOME}/.gitconfig"
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
+  "${HOME}/.config/zed/settings.json"
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
-  "${HOME}/.local/bin/codex-omlx"
 )
 
 # ---- helpers ----------------------------------------------------------------
@@ -380,15 +378,6 @@ PY
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 
-[model_providers.omlx]
-name = "oMLX"
-base_url = "$OMLX_BASE_URL"
-wire_api = "responses"
-
-[profiles.omlx]
-model_provider = "omlx"
-model = "$OMLX_MODEL_ID"
-
 [mcp_servers.paddle]
 command = "$paddle_sandbox"
 env_vars = ["PADDLE_SANDBOX_API_KEY"]
@@ -399,121 +388,7 @@ env_vars = ["PADDLE_PROD_API_KEY"]
 EOF
     ok "created ~/.codex/config.toml."
   fi
-
-  CODEX_CONFIG="$codex_config" \
-  OMLX_BASE_URL="$OMLX_BASE_URL" \
-  OMLX_MODEL_ID="$OMLX_MODEL_ID" \
-  python3 - <<'PY'
-import os
-import re
-from pathlib import Path
-
-path = Path(os.environ["CODEX_CONFIG"])
-content = path.read_text()
-
-def upsert_section(content, section, values):
-    header = f"[{section}]"
-    pattern = re.compile(rf"(?ms)^({re.escape(header)}\n)(.*?)(?=^\[|\Z)")
-    match = pattern.search(content)
-    if not match:
-        block = "\n" + header + "\n" + "".join(f'{key} = "{value}"\n' for key, value in values.items())
-        if content and not content.endswith("\n"):
-            content += "\n"
-        return content + block
-
-    body = match.group(2)
-    for key, value in values.items():
-        line = f'{key} = "{value}"'
-        if re.search(rf"(?m)^{re.escape(key)}\s*=", body):
-            body = re.sub(rf"(?m)^{re.escape(key)}\s*=.*$", line, body)
-        else:
-            body += line + "\n"
-    return content[:match.start(2)] + body + content[match.end(2):]
-
-content = upsert_section(content, "model_providers.omlx", {
-    "name": "oMLX",
-    "base_url": os.environ["OMLX_BASE_URL"],
-    "wire_api": "responses",
-})
-content = upsert_section(content, "profiles.omlx", {
-    "model_provider": "omlx",
-    "model": os.environ["OMLX_MODEL_ID"],
-})
-path.write_text(content)
-PY
-  ok "ensured oMLX Codex provider and 4bit profile."
-}
-
-step_codex_omlx_app() {
-  step "Codex oMLX app launcher"
-  local app_dir="/Applications/Codex oMLX.app"
-  local launcher="${HOME}/.local/bin/codex-omlx"
-  local launcher_source="${REPO_DIR}/apps/codex-omlx-launcher/main.c"
-
-  if [[ ! -x "$launcher" ]]; then
-    warn "$launcher is not executable yet; skipping app launcher."
-    return
-  fi
-
-  if [[ ! -f "$launcher_source" ]]; then
-    warn "$launcher_source is missing; skipping Codex oMLX app launcher."
-    return
-  fi
-
-  if ! command -v clang >/dev/null 2>&1; then
-    warn "clang not on PATH; skipping Codex oMLX app launcher."
-    return
-  fi
-
-  if ! mkdir -p "$app_dir/Contents/MacOS" "$app_dir/Contents/Resources"; then
-    warn "couldn't create $app_dir."
-    return
-  fi
-
-  if ! clang "$launcher_source" -o "$app_dir/Contents/MacOS/codex-omlx-launcher"; then
-    warn "couldn't compile $app_dir."
-    return
-  fi
-
-  if [[ -f "/Applications/Codex.app/Contents/Resources/electron.icns" ]]; then
-    cp -f "/Applications/Codex.app/Contents/Resources/electron.icns" "$app_dir/Contents/Resources/codex-omlx.icns"
-  fi
-  cat >"$app_dir/Contents/Info.plist" <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleDisplayName</key>
-  <string>Codex oMLX</string>
-  <key>CFBundleExecutable</key>
-  <string>codex-omlx-launcher</string>
-  <key>CFBundleIconFile</key>
-  <string>codex-omlx</string>
-  <key>CFBundleIdentifier</key>
-  <string>ch.emin.codex-omlx</string>
-  <key>CFBundleInfoDictionaryVersion</key>
-  <string>6.0</string>
-  <key>CFBundleName</key>
-  <string>Codex oMLX</string>
-  <key>CFBundlePackageType</key>
-  <string>APPL</string>
-  <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
-  <key>CFBundleVersion</key>
-  <string>1</string>
-  <key>LSMinimumSystemVersion</key>
-  <string>12.0</string>
-  <key>NSHighResolutionCapable</key>
-  <true/>
-  <key>NSPrincipalClass</key>
-  <string>NSApplication</string>
-</dict>
-</plist>
-PLIST
-  xattr -dr com.apple.quarantine "$app_dir" 2>/dev/null || true
-  /usr/bin/touch "$app_dir"
-  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app_dir" 2>/dev/null || true
-  ok "created $app_dir."
+  ok "ensured Codex CLI config and Paddle MCP servers."
 }
 
 step_omlx_model() {
@@ -653,7 +528,6 @@ STEPS=(
   step_local_overrides
   step_stow
   step_ai_agent_configs
-  step_codex_omlx_app
   step_secrets_from_1password
   step_omlx_model
   step_codex_signin

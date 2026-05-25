@@ -1,5 +1,5 @@
 # Editor
-export EDITOR="nano"
+export EDITOR="zed --wait"
 export VISUAL="$EDITOR"
 
 # 1Password SSH agent

@@ -23,11 +23,11 @@ cask "android-platform-tools"
 
 # Native IDEs
 cask "android-studio"
+cask "zed"
 
 # AI
 brew "jundot/omlx/omlx"
 cask "codex"
-cask "codex-app"
 
 # Browser & security
 cask "1password"
