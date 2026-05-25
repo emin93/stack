@@ -607,6 +607,7 @@
       <span class="chip"><span class="arrow">→</span>SSH via 1Password agent (Touch ID), public key uploaded to GitHub</span>
       <span class="chip"><span class="arrow">→</span>Google Drive artifact remote via <code>rclone</code></span>
       <span class="chip"><span class="arrow">→</span>Codex CLI sign-in launched for you</span>
+      <span class="chip"><span class="arrow">→</span><code>Codex oMLX.app</code> launcher added to Applications</span>
       <span class="chip"><span class="arrow">→</span>Optional Qwopus3.6 4bit oMLX model download</span>
       <span class="chip"><span class="arrow">→</span>Secrets pulled from a 1Password Secure Note into <code>~/.zshrc.local</code></span>
     </div>
@@ -627,6 +628,7 @@
       <li><strong>Repo origin to SSH</strong><em>Switches the cloned repo from HTTPS to <code>git@github.com</code> once SSH is verified.</em></li>
       <li><strong>Stow</strong><em>Symlinks zsh, git, and helper scripts into <code>$HOME</code>, after touching the <code>.gitconfig.local</code> / <code>.zshrc.local</code> override stubs.</em></li>
       <li><strong>AI agent config</strong><em>Creates or updates local Codex config with Paddle MCP servers and an oMLX profile.</em></li>
+      <li><strong>Codex oMLX app launcher</strong><em>Adds <code>Codex oMLX.app</code> to Applications, temporarily switches Codex to the local oMLX model, then restores the normal config and stops oMLX when Codex quits.</em></li>
       <li><strong>Secrets from 1Password</strong><em>Reads the <code>stack env</code> item and writes fields like <code>HF_TOKEN</code> as exports into <code>~/.zshrc.local</code>.</em></li>
       <li><strong>oMLX model</strong><em>Optionally downloads <code>Jackrong/Qwopus3.6-27B-v2-MLX-4bit</code> into <code>~/.omlx/models</code>.</em></li>
       <li><strong>Codex sign-in</strong><em>Launches Codex for interactive auth.</em></li>

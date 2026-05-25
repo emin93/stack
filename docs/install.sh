@@ -44,6 +44,7 @@ STOW_TARGETS=(
   "${HOME}/.zshrc"
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
+  "${HOME}/.local/bin/codex-omlx"
 )
 
 # ---- helpers ----------------------------------------------------------------
@@ -443,6 +444,78 @@ PY
   ok "ensured oMLX Codex provider and 4bit profile."
 }
 
+step_codex_omlx_app() {
+  step "Codex oMLX app launcher"
+  local app_dir="/Applications/Codex oMLX.app"
+  local launcher="${HOME}/.local/bin/codex-omlx"
+  local launcher_source="${REPO_DIR}/apps/codex-omlx-launcher/main.c"
+
+  if [[ ! -x "$launcher" ]]; then
+    warn "$launcher is not executable yet; skipping app launcher."
+    return
+  fi
+
+  if [[ ! -f "$launcher_source" ]]; then
+    warn "$launcher_source is missing; skipping Codex oMLX app launcher."
+    return
+  fi
+
+  if ! command -v clang >/dev/null 2>&1; then
+    warn "clang not on PATH; skipping Codex oMLX app launcher."
+    return
+  fi
+
+  if ! mkdir -p "$app_dir/Contents/MacOS" "$app_dir/Contents/Resources"; then
+    warn "couldn't create $app_dir."
+    return
+  fi
+
+  if ! clang "$launcher_source" -o "$app_dir/Contents/MacOS/codex-omlx-launcher"; then
+    warn "couldn't compile $app_dir."
+    return
+  fi
+
+  if [[ -f "/Applications/Codex.app/Contents/Resources/electron.icns" ]]; then
+    cp -f "/Applications/Codex.app/Contents/Resources/electron.icns" "$app_dir/Contents/Resources/codex-omlx.icns"
+  fi
+  cat >"$app_dir/Contents/Info.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDisplayName</key>
+  <string>Codex oMLX</string>
+  <key>CFBundleExecutable</key>
+  <string>codex-omlx-launcher</string>
+  <key>CFBundleIconFile</key>
+  <string>codex-omlx</string>
+  <key>CFBundleIdentifier</key>
+  <string>ch.emin.codex-omlx</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>Codex oMLX</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleVersion</key>
+  <string>1</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>12.0</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
+</dict>
+</plist>
+PLIST
+  xattr -dr com.apple.quarantine "$app_dir" 2>/dev/null || true
+  /usr/bin/touch "$app_dir"
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app_dir" 2>/dev/null || true
+  ok "created $app_dir."
+}
+
 step_omlx_model() {
   step "oMLX model"
   if ! command -v hf >/dev/null 2>&1; then
@@ -580,6 +653,7 @@ STEPS=(
   step_local_overrides
   step_stow
   step_ai_agent_configs
+  step_codex_omlx_app
   step_secrets_from_1password
   step_omlx_model
   step_codex_signin
