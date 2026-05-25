@@ -15,8 +15,9 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(git zsh zed bin)
+STOW_PACKAGES=(git zsh cursor continue bin)
 PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
+CURSOR_EXTENSIONS=(continue.continue)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
 OP_ENV_MARKER_END="# <<< stack: 1password-managed env <<<"
@@ -40,8 +41,9 @@ STOW_TARGETS=(
   "${HOME}/.gitconfig"
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
-  "${HOME}/.config/zed/settings.json"
-  "${HOME}/.config/zed/tasks.json"
+  "${HOME}/Library/Application Support/Cursor/User/settings.json"
+  "${HOME}/Library/Application Support/Cursor/User/tasks.json"
+  "${HOME}/.continue/config.yaml"
   "${HOME}/.local/bin/omlx-server"
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
@@ -375,6 +377,22 @@ EOF
   ok "ensured Codex CLI config and Paddle MCP servers."
 }
 
+step_cursor_extensions() {
+  step "Cursor extensions"
+  if ! command -v cursor >/dev/null 2>&1; then
+    warn "Cursor CLI not on PATH; skipping Cursor extension install."
+    return
+  fi
+  local ext
+  for ext in "${CURSOR_EXTENSIONS[@]}"; do
+    if cursor --install-extension "$ext" --force >/dev/null 2>&1; then
+      ok "installed $ext."
+    else
+      warn "couldn't install Cursor extension '$ext'; open Cursor and install it manually."
+    fi
+  done
+}
+
 step_omlx_model() {
   step "oMLX model"
   if ! command -v hf >/dev/null 2>&1; then
@@ -511,6 +529,7 @@ STEPS=(
   step_local_overrides
   step_stow
   step_ai_agent_configs
+  step_cursor_extensions
   step_secrets_from_1password
   step_omlx_model
   step_codex_signin

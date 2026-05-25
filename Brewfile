@@ -23,7 +23,7 @@ cask "android-platform-tools"
 
 # Native IDEs
 cask "android-studio"
-cask "zed"
+cask "cursor"
 
 # AI
 brew "jundot/omlx/omlx"

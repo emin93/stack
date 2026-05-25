@@ -1,0 +1,21 @@
+name: Local oMLX
+version: 0.0.1
+schema: v1
+
+models:
+  - name: Qwopus3.6 27B MLX 4bit
+    provider: openai
+    model: Qwopus3.6-27B-v2-MLX-4bit
+    apiBase: http://127.0.0.1:8000/v1
+    apiKey: local-omlx
+    roles:
+      - chat
+      - edit
+      - apply
+
+context:
+  - provider: code
+  - provider: docs
+  - provider: diff
+  - provider: terminal
+  - provider: problems
