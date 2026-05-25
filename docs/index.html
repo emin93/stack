@@ -629,8 +629,7 @@
     <div class="section-head"><h2>Inside the script</h2><div class="rule"></div></div>
     <ol class="steps">
       <li><strong>Sanity check</strong><em>macOS, Apple Silicon, not root, not truncated.</em></li>
-      <li><strong>Xcode Command Line Tools</strong><em>Triggers the GUI installer if missing.</em></li>
-      <li><strong>Homebrew</strong><em>Installs and wires up <code>brew shellenv</code>.</em></li>
+      <li><strong>Homebrew</strong><em>Installs Homebrew, lets its installer handle Xcode Command Line Tools non-interactively when needed, and wires up <code>brew shellenv</code>.</em></li>
       <li><strong>Clone the repo</strong><em>Uses HTTPS so it works before auth is set up.</em></li>
       <li><strong>Brew bundle</strong><em>Installs every tool and cask declared in the Brewfile.</em></li>
       <li><strong>Google Drive artifact remote</strong><em>Configures the <code>clindesk-drive</code> rclone remote and ensures <code>ClinDesk/marketing-artifacts</code> exists.</em></li>
@@ -652,7 +651,6 @@
     <div class="followups">
       <strong>The script pauses and asks you to do these in the GUI:</strong>
       <ul>
-        <li>Complete the Xcode Command Line Tools installer dialog</li>
         <li>Unlock 1Password and enable the CLI + SSH agent integrations</li>
         <li>Approve the <code>gh auth</code> browser flow</li>
         <li>Approve the Google Drive <code>rclone</code> browser flow</li>

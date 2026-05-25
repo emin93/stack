@@ -74,30 +74,12 @@ step_sanity_checks() {
   ok "macOS on Apple Silicon, not root."
 }
 
-step_xcode_clt() {
-  step "Xcode Command Line Tools"
-  if xcode-select -p >/dev/null 2>&1; then
-    ok "already installed."
-    return
-  fi
-  xcode-select --install || true
-  until xcode-select -p >/dev/null 2>&1; do
-    local reply
-    warn "Xcode Command Line Tools are required before the install can continue."
-    printf "    Complete the Apple installer dialog that opened.\n"
-    read -rp "    Press Enter once installed, or type 'skip' to stop here: " reply
-    if [[ "$reply" == "skip" ]]; then
-      die "Xcode Command Line Tools are required for git, Homebrew, and builds."
-    fi
-    xcode-select --install >/dev/null 2>&1 || true
-  done
-  ok "installed."
-}
-
 step_homebrew() {
   step "Homebrew"
   if ! command -v brew >/dev/null 2>&1; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  elif ! xcode-select -p >/dev/null 2>&1; then
+    die "Homebrew is installed but Xcode Command Line Tools are missing. Re-run the Homebrew installer or run 'xcode-select --install', then re-run this installer."
   fi
   local brew_shellenv='eval "$(/opt/homebrew/bin/brew shellenv)"'
   if ! grep -Fxq "$brew_shellenv" "${HOME}/.zprofile" 2>/dev/null; then
@@ -517,7 +499,6 @@ step_summary() {
 
 STEPS=(
   step_sanity_checks
-  step_xcode_clt
   step_homebrew
   step_clone_repo
   step_brew_bundle
