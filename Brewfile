@@ -39,5 +39,8 @@ cask "whatsapp"
 cask "signal"
 cask "discord"
 
+# Video
+cask "loom"
+
 # Entertainment
 cask "steam"
