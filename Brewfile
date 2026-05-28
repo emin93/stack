@@ -24,6 +24,7 @@ cask "android-studio"
 # AI
 cask "codex"
 cask "claude-code@latest"
+brew "opencode"
 
 # Browser & security
 cask "1password"

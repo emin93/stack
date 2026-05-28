@@ -8,6 +8,9 @@ export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/
 # Local tools
 export PATH="$HOME/.local/bin:$PATH"
 
+# Unsloth Studio
+alias ustudio='unsloth studio -H 0.0.0.0 -p 8888'
+
 # Java (Android Studio bundled JBR)
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
