@@ -448,25 +448,6 @@ step_claude_signin() {
   claude auth login || warn "claude auth login didn't complete; re-run when ready."
 }
 
-step_codex_signin() {
-  step "Codex sign-in"
-  local reply
-  if ! command -v codex >/dev/null 2>&1; then
-    warn "codex CLI not on PATH yet. Open a new shell after this finishes and run 'codex login'."
-    return
-  fi
-  if codex login status >/dev/null 2>&1; then
-    ok "already signed in."
-    return
-  fi
-  read -rp "    Type 'login' to sign in to Codex now, or press Enter to skip: " reply
-  if [[ "$reply" != "login" ]]; then
-    warn "skipping Codex sign-in; run 'codex login' later."
-    return
-  fi
-  codex login || warn "codex login didn't complete; re-run when ready."
-}
-
 step_secrets_from_1password() {
   step "Sync secrets from 1Password to ~/.zshrc.local"
   if ! command -v op >/dev/null 2>&1; then
@@ -550,7 +531,6 @@ STEPS=(
   step_secrets_from_1password
   step_claude_signin
   step_claude_mcp_servers
-  step_codex_signin
 )
 STEP_TOTAL=${#STEPS[@]}
 
