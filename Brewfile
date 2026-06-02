@@ -8,16 +8,22 @@ brew "ffmpeg"
 brew "node"
 brew "pnpm"
 brew "go"
-brew "rust"
+brew "rustup"
+brew "uv"
+brew "cmake"
 brew "webp"
 brew "hf"
 brew "rclone"
+
+# Cloud
+cask "gcloud-cli"
 
 # iOS/macOS dev
 brew "xcbeautify"
 
 # Android dev
 cask "android-platform-tools"
+cask "android-ndk"
 
 # Native IDEs
 cask "android-studio"
