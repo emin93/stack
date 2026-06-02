@@ -31,6 +31,7 @@ cask "android-studio"
 # AI
 cask "codex"
 cask "claude-code@latest"
+cask "conductor"
 
 # Browser & security
 cask "1password"
