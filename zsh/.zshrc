@@ -1,5 +1,5 @@
 # Editor
-export EDITOR="open -W -a OpenCode"
+export EDITOR="vim"
 export VISUAL="$EDITOR"
 
 # 1Password SSH agent

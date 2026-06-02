@@ -539,10 +539,6 @@
         <span class="tile-icon"><img src="https://cdn.simpleicons.org/claude/D97757" alt="" loading="lazy"></span>
         <span class="tile-body"><span class="tile-name">Claude Code</span><span class="tile-desc">Anthropic coding agent</span></span>
       </a>
-      <a class="tile" href="https://opencode.ai" target="_blank" rel="noopener">
-        <span class="tile-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 8 4 4-4 4"/><path d="M13 16h4"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg></span>
-        <span class="tile-body"><span class="tile-name">OpenCode</span><span class="tile-desc">Open-source terminal agent</span></span>
-      </a>
       <a class="tile" href="https://apps.apple.com/us/app/xcode/id497799835?mt=12" target="_blank" rel="noopener">
         <span class="tile-icon"><img src="https://cdn.simpleicons.org/xcode/147EFB" alt="" loading="lazy"></span>
         <span class="tile-body"><span class="tile-name">Xcode</span><span class="tile-desc">Apple IDE</span></span>
@@ -649,12 +645,11 @@
       <li><strong>GitHub auth</strong><em>Runs device-code login and sets <code>gh auth setup-git</code> as the credential helper.</em></li>
       <li><strong>1Password SSH agent</strong><em>Waits for the GUI integration and SSH agent to be enabled, wires <code>~/.ssh/config</code> to the agent, and uploads the public key to GitHub for SSH auth.</em></li>
       <li><strong>Repo origin to SSH</strong><em>Switches the cloned repo from HTTPS to <code>git@github.com</code> once SSH is verified.</em></li>
-      <li><strong>Stow</strong><em>Symlinks zsh, git, Claude Code config, OpenCode config, and helper scripts into <code>$HOME</code>, after touching the <code>.gitconfig.local</code> / <code>.zshrc.local</code> override stubs.</em></li>
-      <li><strong>AI agent config</strong><em>Creates or updates local Codex config with Paddle MCP servers.</em></li>
+      <li><strong>Stow</strong><em>Symlinks zsh, git, Claude Code config, and helper scripts into <code>$HOME</code>, after touching the <code>.gitconfig.local</code> / <code>.zshrc.local</code> override stubs.</em></li>
+      <li><strong>AI agent config</strong><em>Creates or updates local Codex config with Paddle MCP servers and the Unsloth Studio local-model provider.</em></li>
       <li><strong>Secrets from 1Password</strong><em>Reads the <code>stack env</code> item and writes fields like <code>HF_TOKEN</code> as exports into <code>~/.zshrc.local</code>.</em></li>
       <li><strong>Claude sign-in</strong><em>Launches Claude Code for interactive auth.</em></li>
       <li><strong>Claude MCP servers</strong><em>Registers Paddle sandbox and production wrappers with Claude Code.</em></li>
-      <li><strong>Codex sign-in</strong><em>Launches Codex for interactive auth.</em></li>
       <li><strong>Final summary</strong><em>Prints App Store reminders for 1Password for Safari, Wipr, and Xcode.</em></li>
     </ol>
   </section>
