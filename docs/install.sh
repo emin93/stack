@@ -15,7 +15,7 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
-STOW_PACKAGES=(git zsh claude bin opencode)
+STOW_PACKAGES=(git zsh claude bin)
 PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -39,7 +39,6 @@ STOW_TARGETS=(
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
   "${HOME}/.claude/settings.json"
-  "${HOME}/.config/opencode/opencode.json"
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
 )
@@ -359,6 +358,11 @@ PY
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 
+# Default every Codex session to the local Unsloth model (provider defined below).
+# To fall back to a cloud model, set model_provider back to "openai" (or remove it).
+model = "unsloth"
+model_provider = "unsloth"
+
 [mcp_servers.paddle]
 command = "$paddle_sandbox"
 env_vars = ["PADDLE_SANDBOX_API_KEY"]
@@ -366,6 +370,14 @@ env_vars = ["PADDLE_SANDBOX_API_KEY"]
 [mcp_servers.paddle-prod]
 command = "$paddle_prod"
 env_vars = ["PADDLE_PROD_API_KEY"]
+
+# Local model via Unsloth Studio (OpenAI-compatible); set as the default provider above.
+# The server ignores the model name and serves whatever is loaded in the studio.
+[model_providers.unsloth]
+name = "Unsloth Studio (local)"
+base_url = "http://127.0.0.1:8888/v1"
+env_key = "UNSLOTH_STUDIO_API_KEY"
+wire_api = "responses"
 EOF
     ok "created ~/.codex/config.toml."
   fi
@@ -472,7 +484,7 @@ step_secrets_from_1password() {
   if ! op item get "$OP_ENV_ITEM" --format=json >/dev/null 2>&1; then
     warn "1Password item '$OP_ENV_ITEM' not found."
     printf "    Create a Secure Note named '%s' with each secret as a concealed field\n" "$OP_ENV_ITEM"
-    printf "    whose label is the env var name (e.g. PADDLE_SANDBOX_API_KEY, HF_TOKEN).\n"
+    printf "    whose label is the env var name (e.g. PADDLE_SANDBOX_API_KEY, HF_TOKEN, UNSLOTH_STUDIO_API_KEY).\n"
     return
   fi
   local exports
