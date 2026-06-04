@@ -16,6 +16,9 @@ export PATH="$JAVA_HOME/bin:$PATH"
 export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/emulator:$PATH"
 
+# Android NDK (brew cask android-ndk; symlink tracks the current version)
+export ANDROID_NDK_HOME="/opt/homebrew/share/android-ndk"
+
 # pnpm globals
 export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
