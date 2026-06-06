@@ -31,7 +31,8 @@ cask "android-studio"
 # AI
 cask "codex"
 cask "claude-code@latest"
-cask "conductor"
+cask "superset"
+brew "opencode"
 
 # Browser & security
 cask "1password"
