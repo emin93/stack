@@ -28,3 +28,8 @@ esac
 
 # Machine-local overrides
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/emin/.lmstudio/bin"
+# End of LM Studio CLI section
+
