@@ -33,3 +33,17 @@ esac
 export PATH="$PATH:/Users/emin/.lmstudio/bin"
 # End of LM Studio CLI section
 
+# opencode: sync the loaded LM Studio models before launch so LM Studio stays the
+# single source of truth for the local model list, tool support, and context
+# length. The generated config lives outside the dotfiles repo and is merged in
+# via OPENCODE_CONFIG, keeping the tracked opencode.json clean.
+opencode() {
+  "$HOME/.config/opencode/sync-lmstudio.sh" >/dev/null 2>&1 || true
+  local cfg="$HOME/.cache/opencode/lmstudio.json"
+  if [[ -f "$cfg" ]]; then
+    OPENCODE_CONFIG="$cfg" command opencode "$@"
+  else
+    command opencode "$@"
+  fi
+}
+
