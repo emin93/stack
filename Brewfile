@@ -31,7 +31,7 @@ cask "android-studio"
 # AI
 cask "codex"
 cask "claude-code@latest"
-cask "superset"
+cask "conductor"
 brew "opencode"
 cask "lm-studio"
 
