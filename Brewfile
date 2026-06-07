@@ -33,6 +33,7 @@ cask "codex"
 cask "claude-code@latest"
 cask "superset"
 brew "opencode"
+cask "lm-studio"
 
 # Browser & security
 cask "1password"
