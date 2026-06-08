@@ -14,7 +14,7 @@ REPO_NAME="stack"
 REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
-REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
+REPO_DIR="${HOME}/orca/repos/${REPO_NAME}"
 STOW_PACKAGES=(git zsh claude bin opencode)
 PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
@@ -39,6 +39,7 @@ STOW_TARGETS=(
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
   "${HOME}/.claude/settings.json"
+  "${HOME}/.config/opencode"
   "${HOME}/.config/opencode/opencode.json"
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
@@ -314,6 +315,15 @@ step_repo_remote_ssh() {
 step_stow() {
   step "Stow configs"
   for target in "${STOW_TARGETS[@]}"; do
+    if [[ -L "$target" ]]; then
+      local link_target
+      link_target=$(readlink "$target")
+      if [[ "$link_target" == *"repos/${REPO_NAME}/"* && "$link_target" != *"orca/repos/${REPO_NAME}/"* ]]; then
+        rm "$target"
+        warn "removed stale stow link $target -> $link_target"
+        continue
+      fi
+    fi
     if [[ -e "$target" && ! -L "$target" ]]; then
       local backup="${target}.pre-install.bak"
       if [[ -e "$backup" || -L "$backup" ]]; then

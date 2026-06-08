@@ -1,3 +1,5 @@
+tap "stablyai/orca"
+
 # CLI tools
 brew "stow"
 brew "ripgrep"
@@ -31,7 +33,7 @@ cask "android-studio"
 # AI
 cask "codex"
 cask "claude-code@latest"
-cask "conductor"
+cask "stablyai/orca/orca"
 brew "opencode"
 cask "lm-studio"
 
