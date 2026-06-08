@@ -35,7 +35,7 @@ cask "codex"
 cask "claude-code@latest"
 cask "stablyai/orca/orca"
 brew "opencode"
-brew "ollama"
+cask "ollama-app"
 
 # Browser & security
 cask "1password"
