@@ -34,7 +34,6 @@ cask "android-studio"
 cask "codex"
 cask "claude-code@latest"
 cask "stablyai/orca/orca"
-brew "opencode"
 cask "ollama-app"
 
 # Browser & security
@@ -45,9 +44,6 @@ cask "1password-cli"
 cask "whatsapp"
 cask "signal"
 cask "discord"
-
-# Video
-cask "loom"
 
 # Entertainment
 cask "steam"
