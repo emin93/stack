@@ -1,4 +1,5 @@
 tap "stablyai/orca"
+tap "emin93/tap"
 
 # CLI tools
 brew "stow"
@@ -37,6 +38,7 @@ cask "android-studio"
 cask "codex"
 cask "claude-code@latest"
 cask "stablyai/orca/orca"
+cask "emin93/tap/dakodeon"
 
 # Browser & security
 cask "1password"
