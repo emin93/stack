@@ -15,7 +15,7 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/orca/repos/${REPO_NAME}"
-STOW_PACKAGES=(git zsh claude bin)
+STOW_PACKAGES=(git zsh claude bin opencode llama)
 PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -39,8 +39,11 @@ STOW_TARGETS=(
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
   "${HOME}/.claude/settings.json"
+  "${HOME}/.config/opencode/opencode.json"
+  "${HOME}/.config/llama-server/profiles/"*.env
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
+  "${HOME}/.local/bin/ls-start"
 )
 
 # ---- helpers ----------------------------------------------------------------

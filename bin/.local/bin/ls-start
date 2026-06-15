@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# Start a named local llama.cpp server profile for OpenCode.
+set -euo pipefail
+
+profile_dir="${LLAMA_SERVER_PROFILE_DIR:-$HOME/.config/llama-server/profiles}"
+host="127.0.0.1"
+port="8080"
+
+if [[ $# -ne 0 ]]; then
+  printf 'Usage: ls-start\n' >&2
+  exit 2
+fi
+
+command -v fzf >/dev/null 2>&1 || {
+  printf 'fzf is required for ls-start. Install it with: brew install fzf\n' >&2
+  exit 127
+}
+
+profile_files=("$profile_dir"/*.env)
+if [[ ! -e "${profile_files[0]}" ]]; then
+  printf 'No llama-server profiles found in %s\n' "$profile_dir" >&2
+  exit 2
+fi
+
+selected="$(
+  for profile_file in "${profile_files[@]}"; do
+    name="$(sed -n 's/^LLAMA_SERVER_NAME=//p' "$profile_file" | head -n1)"
+    name="${name%\"}"; name="${name#\"}"
+    printf '%s\t%s\n' "${name:-$(basename "$profile_file" .env)}" "$profile_file"
+  done | fzf \
+    --height=40% \
+    --layout=reverse \
+    --border \
+    --prompt='llama model > ' \
+    --delimiter=$'\t' \
+    --with-nth=1
+)" || exit 130
+
+if [[ -z "$selected" ]]; then
+  exit 130
+fi
+
+profile_file="${selected#*$'\t'}"
+if [[ ! -f "$profile_file" ]]; then
+  printf 'Profile file not found: %s\n' "$profile_file" >&2
+  exit 2
+fi
+
+set -a
+# shellcheck source=/dev/null
+source "$profile_file"
+set +a
+
+: "${LLAMA_SERVER_MODEL:?LLAMA_SERVER_MODEL must be set in $profile_file}"
+model="${LLAMA_SERVER_MODEL#hf:}"
+
+printf 'Selected: %s\n' "$LLAMA_SERVER_NAME"
+printf 'Main model: %s\n' "$model"
+
+draft_args=()
+if [[ -n "${LLAMA_SERVER_DRAFT_REPO:-}" && -n "${LLAMA_SERVER_DRAFT_FILE:-}" ]]; then
+  printf 'MTP draft: resolving %s/%s\n' "$LLAMA_SERVER_DRAFT_REPO" "$LLAMA_SERVER_DRAFT_FILE"
+  draft_model="$(hf download "$LLAMA_SERVER_DRAFT_REPO" "$LLAMA_SERVER_DRAFT_FILE" --quiet)"
+  printf 'MTP draft: %s\n' "$draft_model"
+  draft_args=(
+    --model-draft "$draft_model"
+    --spec-type "${LLAMA_SERVER_SPEC_TYPE:-draft-mtp}"
+    --spec-draft-n-max "${LLAMA_SERVER_SPEC_DRAFT_N_MAX:-4}"
+    --n-gpu-layers-draft "${LLAMA_SERVER_DRAFT_GPU_LAYERS:-all}"
+  )
+fi
+
+log_file="$(mktemp -t ls-start.XXXXXX.log)"
+printf 'Starting llama-server on http://%s:%s ...\n' "$host" "$port"
+printf 'Logs: %s\n' "$log_file"
+
+llama-server \
+  -hf "$model" \
+  "${draft_args[@]}" \
+  --alias "${LLAMA_SERVER_ALIAS:-local}" \
+  --ctx-size "${LLAMA_SERVER_CTX_SIZE:-0}" \
+  --device "${LLAMA_SERVER_DEVICE:-MTL0}" \
+  --n-gpu-layers "${LLAMA_SERVER_GPU_LAYERS:-all}" \
+  --fit "${LLAMA_SERVER_FIT:-on}" \
+  -fa "${LLAMA_SERVER_FLASH_ATTN:-on}" \
+  --cache-type-k "${LLAMA_SERVER_CACHE_TYPE_K:-q8_0}" \
+  --cache-type-v "${LLAMA_SERVER_CACHE_TYPE_V:-q8_0}" \
+  --log-verbosity 1 \
+  --no-ui \
+  --mlock >"$log_file" 2>&1 &
+
+pid=$!
+cleanup() {
+  kill "$pid" 2>/dev/null || true
+}
+trap cleanup INT TERM EXIT
+
+for _ in {1..120}; do
+  if ! kill -0 "$pid" 2>/dev/null; then
+    printf 'llama-server exited during startup.\n' >&2
+    tail -n 80 "$log_file" >&2
+    exit 1
+  fi
+  if curl -fsS "http://$host:$port/v1/models" >/dev/null 2>&1; then
+    printf 'Ready: http://%s:%s/v1\n' "$host" "$port"
+    printf 'Press Ctrl-C to stop.\n'
+    wait "$pid"
+    exit $?
+  fi
+  sleep 1
+done
+
+printf 'Timed out waiting for llama-server readiness.\n' >&2
+tail -n 80 "$log_file" >&2
+exit 1
