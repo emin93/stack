@@ -83,7 +83,7 @@
     ]
   },
   "effortLevel": "xhigh",
-  "tui": "fullscreen",
+  "tui": "default",
   "skipDangerousModePermissionPrompt": true,
   "theme": "auto"
 }
