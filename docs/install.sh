@@ -15,10 +15,7 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/orca/repos/${REPO_NAME}"
-STOW_PACKAGES=(git zsh claude bin hermes)
-HERMES_TUI_REPO="https://github.com/NousResearch/hermes-agent.git"
-HERMES_TUI_ROOT="${HOME}/.hermes/tui-bundle/hermes-agent"
-HERMES_TUI_DIR="${HERMES_TUI_ROOT}/ui-tui"
+STOW_PACKAGES=(git zsh claude bin codex)
 PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -42,7 +39,8 @@ STOW_TARGETS=(
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
   "${HOME}/.claude/settings.json"
-  "${HOME}/.hermes/config.yaml"
+  "${HOME}/.codex/fugu.json"
+  "${HOME}/.codex/dakodeon.json"
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
 )
@@ -63,6 +61,42 @@ step()   { STEP_NUM=$((STEP_NUM + 1)); printf "\n%s==>%s %s[%d/%d]%s %s\n" "$C_B
 ok()     { printf "    %s✓%s %s\n" "$C_GREEN" "$C_RESET" "$*"; }
 warn()   { printf "    %s!%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 die()    { printf "%s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; exit 1; }
+
+write_managed_block() {
+  local file="$1"
+  local marker="$2"
+  local body="$3"
+  local begin="# >>> ${marker} >>>"
+  local end="# <<< ${marker} <<<"
+
+  mkdir -p "$(dirname "$file")"
+  touch "$file"
+  chmod 600 "$file" 2>/dev/null || true
+  MANAGED_FILE="$file" \
+  MANAGED_BEGIN="$begin" \
+  MANAGED_END="$end" \
+  MANAGED_BODY="$body" \
+  python3 - <<'PY'
+import os
+import pathlib
+import re
+
+path = pathlib.Path(os.environ["MANAGED_FILE"])
+begin = os.environ["MANAGED_BEGIN"]
+end = os.environ["MANAGED_END"]
+body = os.environ["MANAGED_BODY"].rstrip()
+block = f"{begin}\n{body}\n{end}\n"
+content = path.read_text() if path.exists() else ""
+pattern = re.compile(re.escape(begin) + r"[\s\S]*?" + re.escape(end) + r"\n?")
+if pattern.search(content):
+    content = pattern.sub(block, content)
+else:
+    if content and not content.endswith("\n"):
+        content += "\n"
+    content += "\n" + block
+path.write_text(content)
+PY
+}
 
 # ---- steps ------------------------------------------------------------------
 
@@ -112,50 +146,6 @@ step_brew_bundle() {
   step "Brew bundle"
   if ! HOMEBREW_CASK_OPTS="--adopt" brew bundle --file="$REPO_DIR/Brewfile"; then
     die "brew bundle failed; fix the Homebrew error above and re-run the installer."
-  fi
-}
-
-step_hermes_tui_assets() {
-  step "Hermes TUI assets"
-  if [[ -f "${HERMES_TUI_DIR}/dist/entry.js" ]]; then
-    ok "Hermes TUI bundle already exists."
-    return
-  fi
-  if ! command -v hermes >/dev/null 2>&1; then
-    warn "hermes not on PATH; skipping TUI asset bootstrap."
-    return
-  fi
-  if ! command -v npm >/dev/null 2>&1; then
-    warn "npm not on PATH; skipping TUI asset bootstrap."
-    return
-  fi
-
-  mkdir -p "$(dirname "$HERMES_TUI_ROOT")"
-  if [[ -d "${HERMES_TUI_ROOT}/.git" ]]; then
-    git -C "$HERMES_TUI_ROOT" fetch --depth=1 origin main || {
-      warn "couldn't update Hermes TUI source; skipping."
-      return
-    }
-    git -C "$HERMES_TUI_ROOT" checkout --detach FETCH_HEAD || {
-      warn "couldn't check out Hermes TUI source; skipping."
-      return
-    }
-  elif [[ -e "$HERMES_TUI_ROOT" ]]; then
-    warn "$HERMES_TUI_ROOT exists but is not a git checkout; skipping."
-    return
-  else
-    git clone --depth 1 "$HERMES_TUI_REPO" "$HERMES_TUI_ROOT" || {
-      warn "couldn't clone Hermes TUI source; skipping."
-      return
-    }
-  fi
-
-  if (cd "$HERMES_TUI_ROOT" \
-      && npm install --workspace ui-tui --silent --no-fund --no-audit --progress=false \
-      && npm run build --workspace ui-tui --silent); then
-    ok "built Hermes TUI bundle."
-  else
-    warn "couldn't build Hermes TUI bundle; classic Hermes CLI will still work."
   fi
 }
 
@@ -379,7 +369,7 @@ step_stow() {
       warn "backed up $target -> $backup"
     fi
   done
-  mkdir -p "${HOME}/.config" "${HOME}/.claude" "${HOME}/.hermes" "${HOME}/.local/bin" "${HOME}/.codex"
+  mkdir -p "${HOME}/.config" "${HOME}/.claude" "${HOME}/.local/bin" "${HOME}/.codex"
   stow --target="$HOME" --dir="$REPO_DIR" --restow "${STOW_PACKAGES[@]}"
   ok "stowed: ${STOW_PACKAGES[*]}"
 }
@@ -414,6 +404,8 @@ PY
     install -m 600 /dev/stdin "$codex_config" <<EOF
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "high"
 
 [mcp_servers.paddle]
 command = "$paddle_sandbox"
@@ -425,7 +417,66 @@ env_vars = ["PADDLE_PROD_API_KEY"]
 EOF
     ok "created ~/.codex/config.toml."
   fi
-  ok "ensured Codex CLI config and Paddle MCP servers."
+
+  local codex_provider_block
+  codex_provider_block=$(cat <<'EOF'
+[model_providers.sakana]
+name = "Sakana API"
+base_url = "https://api.sakana.ai/v1"
+env_key = "SAKANA_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 7200000
+stream_max_retries = 5
+request_max_retries = 4
+
+[model_providers.dakodeon]
+name = "Dakodeon"
+base_url = "http://127.0.0.1:8080/v1"
+stream_idle_timeout_ms = 7200000
+stream_max_retries = 5
+request_max_retries = 4
+EOF
+)
+  write_managed_block "$codex_config" "stack:codex-model-providers" "$codex_provider_block"
+
+  install -m 600 /dev/stdin "${HOME}/.codex/fugu.config.toml" <<EOF
+model = "fugu"
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "high"
+model_provider = "sakana"
+model_catalog_json = "${HOME}/.codex/fugu.json"
+
+[features]
+image_generation = false
+apps = false
+EOF
+
+  install -m 600 /dev/stdin "${HOME}/.codex/fugu-ultra.config.toml" <<EOF
+model = "fugu-ultra"
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "high"
+model_provider = "sakana"
+model_catalog_json = "${HOME}/.codex/fugu.json"
+
+[features]
+image_generation = false
+apps = false
+EOF
+
+  install -m 600 /dev/stdin "${HOME}/.codex/dakodeon.config.toml" <<EOF
+model = "gemma4-12b-it-qat"
+model_provider = "dakodeon"
+model_context_window = 131072
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "medium"
+model_catalog_json = "${HOME}/.codex/dakodeon.json"
+
+[features]
+image_generation = false
+apps = false
+EOF
+
+  ok "ensured Codex CLI config, Paddle MCP servers, and Fugu/Dakodeon profiles."
 }
 
 step_claude_mcp_servers() {
@@ -543,6 +594,33 @@ else:
 path.write_text(content)
 PY
   ok "wrote $(grep -c '^export ' <<<"$exports") secret(s) to ~/.zshrc.local"
+
+  local sakana_key
+  sakana_key=$(op item get "$OP_ENV_ITEM" --format=json \
+    | jq -r '.fields[] | select(.label == "SAKANA_API_KEY" and .value != null) | .value' \
+    | tail -n1)
+  if [[ -n "$sakana_key" ]]; then
+    local codex_env="${HOME}/.codex/.env"
+    mkdir -p "${HOME}/.codex"
+    touch "$codex_env"
+    chmod 600 "$codex_env"
+    CODEX_ENV_FILE="$codex_env" SAKANA_API_KEY_VALUE="$sakana_key" python3 - <<'PY'
+import os
+import pathlib
+import re
+
+path = pathlib.Path(os.environ["CODEX_ENV_FILE"])
+key = os.environ["SAKANA_API_KEY_VALUE"]
+line = f"SAKANA_API_KEY={key}\n"
+content = path.read_text() if path.exists() else ""
+content = re.sub(r"^(?:export\s+)?SAKANA_API_KEY=.*\n?", "", content, flags=re.MULTILINE)
+if content and not content.endswith("\n"):
+    content += "\n"
+content += line
+path.write_text(content)
+PY
+    ok "synced SAKANA_API_KEY to ~/.codex/.env"
+  fi
 }
 
 step_summary() {
@@ -563,7 +641,6 @@ STEPS=(
   step_homebrew
   step_clone_repo
   step_brew_bundle
-  step_hermes_tui_assets
   step_rclone_drive
   step_pnpm_global
   step_gh_auth
