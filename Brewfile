@@ -19,7 +19,7 @@ brew "webp"
 brew "hf"
 brew "rclone"
 brew "llama.cpp"
-brew "opencode"
+brew "hermes-agent"
 
 # Cloud
 cask "gcloud-cli"

@@ -15,7 +15,10 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/orca/repos/${REPO_NAME}"
-STOW_PACKAGES=(git zsh claude bin opencode)
+STOW_PACKAGES=(git zsh claude bin hermes)
+HERMES_TUI_REPO="https://github.com/NousResearch/hermes-agent.git"
+HERMES_TUI_ROOT="${HOME}/.hermes/tui-bundle/hermes-agent"
+HERMES_TUI_DIR="${HERMES_TUI_ROOT}/ui-tui"
 PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -39,7 +42,7 @@ STOW_TARGETS=(
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
   "${HOME}/.claude/settings.json"
-  "${HOME}/.config/opencode/opencode.json"
+  "${HOME}/.hermes/config.yaml"
   "${HOME}/.local/bin/paddle-sandbox"
   "${HOME}/.local/bin/paddle-prod"
 )
@@ -109,6 +112,50 @@ step_brew_bundle() {
   step "Brew bundle"
   if ! HOMEBREW_CASK_OPTS="--adopt" brew bundle --file="$REPO_DIR/Brewfile"; then
     die "brew bundle failed; fix the Homebrew error above and re-run the installer."
+  fi
+}
+
+step_hermes_tui_assets() {
+  step "Hermes TUI assets"
+  if [[ -f "${HERMES_TUI_DIR}/dist/entry.js" ]]; then
+    ok "Hermes TUI bundle already exists."
+    return
+  fi
+  if ! command -v hermes >/dev/null 2>&1; then
+    warn "hermes not on PATH; skipping TUI asset bootstrap."
+    return
+  fi
+  if ! command -v npm >/dev/null 2>&1; then
+    warn "npm not on PATH; skipping TUI asset bootstrap."
+    return
+  fi
+
+  mkdir -p "$(dirname "$HERMES_TUI_ROOT")"
+  if [[ -d "${HERMES_TUI_ROOT}/.git" ]]; then
+    git -C "$HERMES_TUI_ROOT" fetch --depth=1 origin main || {
+      warn "couldn't update Hermes TUI source; skipping."
+      return
+    }
+    git -C "$HERMES_TUI_ROOT" checkout --detach FETCH_HEAD || {
+      warn "couldn't check out Hermes TUI source; skipping."
+      return
+    }
+  elif [[ -e "$HERMES_TUI_ROOT" ]]; then
+    warn "$HERMES_TUI_ROOT exists but is not a git checkout; skipping."
+    return
+  else
+    git clone --depth 1 "$HERMES_TUI_REPO" "$HERMES_TUI_ROOT" || {
+      warn "couldn't clone Hermes TUI source; skipping."
+      return
+    }
+  fi
+
+  if (cd "$HERMES_TUI_ROOT" \
+      && npm install --workspace ui-tui --silent --no-fund --no-audit --progress=false \
+      && npm run build --workspace ui-tui --silent); then
+    ok "built Hermes TUI bundle."
+  else
+    warn "couldn't build Hermes TUI bundle; classic Hermes CLI will still work."
   fi
 }
 
@@ -332,7 +379,7 @@ step_stow() {
       warn "backed up $target -> $backup"
     fi
   done
-  mkdir -p "${HOME}/.config" "${HOME}/.claude" "${HOME}/.local/bin" "${HOME}/.codex"
+  mkdir -p "${HOME}/.config" "${HOME}/.claude" "${HOME}/.hermes" "${HOME}/.local/bin" "${HOME}/.codex"
   stow --target="$HOME" --dir="$REPO_DIR" --restow "${STOW_PACKAGES[@]}"
   ok "stowed: ${STOW_PACKAGES[*]}"
 }
@@ -516,6 +563,7 @@ STEPS=(
   step_homebrew
   step_clone_repo
   step_brew_bundle
+  step_hermes_tui_assets
   step_rclone_drive
   step_pnpm_global
   step_gh_auth

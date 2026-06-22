@@ -1,0 +1,24 @@
+model:
+  provider: sakana
+  default: fugu-ultra
+  base_url: https://api.sakana.ai/v1
+  api_mode: chat_completions
+
+providers:
+  sakana:
+    name: Sakana
+    base_url: https://api.sakana.ai/v1
+    key_env: SAKANA_API_KEY
+    transport: openai_chat
+    api_mode: chat_completions
+    default_model: fugu-ultra
+  dakodeon:
+    name: Dakodeon
+    base_url: http://127.0.0.1:8080/v1
+    transport: openai_chat
+    api_mode: chat_completions
+    default_model: gemma4-12b-it-qat
+    models:
+      gemma4-12b-it-qat: {}
+      gemma4-26b-a4b-it-qat: {}
+      gemma4-e2b-it-qat: {}

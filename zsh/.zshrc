@@ -26,6 +26,8 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 
+# Hermes TUI assets for the Homebrew CLI package
+export HERMES_TUI_DIR="$HOME/.hermes/tui-bundle/hermes-agent/ui-tui"
+
 # Machine-local overrides
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-
