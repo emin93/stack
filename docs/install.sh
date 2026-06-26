@@ -464,9 +464,9 @@ apps = false
 EOF
 
   install -m 600 /dev/stdin "${HOME}/.codex/dakodeon.config.toml" <<EOF
-model = "gemma4-12b-it-qat"
+model = "ornith-1.0-35b"
 model_provider = "dakodeon"
-model_context_window = 131072
+model_context_window = 262144
 model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "medium"
 model_catalog_json = "${HOME}/.codex/dakodeon.json"
