@@ -623,7 +623,7 @@
       <span class="chip"><span class="arrow">→</span>Google Drive artifact remote via <code>rclone</code></span>
       <span class="chip"><span class="arrow">→</span>Claude Code sign-in launched for you</span>
       <span class="chip"><span class="arrow">→</span>Codex configured with Fugu and Dakodeon profiles</span>
-      <span class="chip"><span class="arrow">→</span>Claude Code configured with bypass permissions and Paddle MCP servers</span>
+      <span class="chip"><span class="arrow">→</span>Claude Code configured with bypass permissions</span>
       <span class="chip"><span class="arrow">→</span>Secrets pulled from a 1Password Secure Note into <code>~/.zshrc.local</code></span>
     </div>
   </section>
@@ -636,15 +636,14 @@
       <li><strong>Clone the repo</strong><em>Uses HTTPS so it works before auth is set up.</em></li>
       <li><strong>Brew bundle</strong><em>Installs every tool and cask declared in the Brewfile.</em></li>
       <li><strong>Google Drive artifact remote</strong><em>Configures the <code>clindesk-drive</code> rclone remote and ensures <code>ClinDesk/marketing-artifacts</code> exists.</em></li>
-      <li><strong>pnpm globals</strong><em>Installs <code>wrangler</code> and <code>@paddle/paddle-mcp</code>.</em></li>
+      <li><strong>pnpm globals</strong><em>Installs <code>wrangler</code>.</em></li>
       <li><strong>GitHub auth</strong><em>Runs device-code login and sets <code>gh auth setup-git</code> as the credential helper.</em></li>
       <li><strong>1Password SSH agent</strong><em>Waits for the GUI integration and SSH agent to be enabled, wires <code>~/.ssh/config</code> to the agent, and uploads the public key to GitHub for SSH auth.</em></li>
       <li><strong>Repo origin to SSH</strong><em>Switches the cloned repo from HTTPS to <code>git@github.com</code> once SSH is verified.</em></li>
       <li><strong>Stow</strong><em>Symlinks zsh, git, Claude Code config, Codex support files, and helper scripts into <code>$HOME</code>, after touching the <code>.gitconfig.local</code> / <code>.zshrc.local</code> override stubs.</em></li>
-      <li><strong>AI agent config</strong><em>Creates or updates Codex config, Paddle MCP server wiring, and Fugu/Dakodeon model profiles.</em></li>
+      <li><strong>AI agent config</strong><em>Creates or updates Codex config and Fugu/Dakodeon model profiles.</em></li>
       <li><strong>Secrets from 1Password</strong><em>Reads the <code>stack env</code> item and writes API keys into <code>~/.zshrc.local</code>, plus the Sakana key into <code>~/.codex/.env</code> when present.</em></li>
       <li><strong>Claude sign-in</strong><em>Launches Claude Code for interactive auth.</em></li>
-      <li><strong>Claude MCP servers</strong><em>Registers Paddle sandbox and production wrappers with Claude Code.</em></li>
       <li><strong>Final summary</strong><em>Prints App Store reminders for 1Password for Safari, Wipr, and Xcode.</em></li>
     </ol>
   </section>

@@ -16,7 +16,7 @@ REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/orca/repos/${REPO_NAME}"
 STOW_PACKAGES=(git zsh claude bin codex)
-PNPM_GLOBAL=(wrangler @paddle/paddle-mcp)
+PNPM_GLOBAL=(wrangler)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
 OP_ENV_MARKER_END="# <<< stack: 1password-managed env <<<"
@@ -41,8 +41,6 @@ STOW_TARGETS=(
   "${HOME}/.claude/settings.json"
   "${HOME}/.codex/fugu.json"
   "${HOME}/.codex/dakodeon.json"
-  "${HOME}/.local/bin/paddle-sandbox"
-  "${HOME}/.local/bin/paddle-prod"
 )
 
 # ---- helpers ----------------------------------------------------------------
@@ -379,41 +377,14 @@ step_ai_agent_configs() {
   mkdir -p "${HOME}/.codex"
 
   local codex_config="${HOME}/.codex/config.toml"
-  local paddle_sandbox="${HOME}/.local/bin/paddle-sandbox"
-  local paddle_prod="${HOME}/.local/bin/paddle-prod"
   if [[ -e "$codex_config" || -L "$codex_config" ]]; then
-    if grep -Eq 'command = "(paddle-sandbox|paddle-prod)"' "$codex_config"; then
-      CODEX_CONFIG="$codex_config" \
-      PADDLE_SANDBOX_CMD="$paddle_sandbox" \
-      PADDLE_PROD_CMD="$paddle_prod" \
-      python3 - <<'PY'
-import os
-from pathlib import Path
-
-path = Path(os.environ["CODEX_CONFIG"])
-content = path.read_text()
-content = content.replace('command = "paddle-sandbox"', f'command = "{os.environ["PADDLE_SANDBOX_CMD"]}"')
-content = content.replace('command = "paddle-prod"', f'command = "{os.environ["PADDLE_PROD_CMD"]}"')
-path.write_text(content)
-PY
-      ok "updated ~/.codex/config.toml Paddle commands to absolute paths."
-    else
-      ok "~/.codex/config.toml already exists; leaving it alone."
-    fi
+    ok "~/.codex/config.toml already exists; leaving it alone."
   else
     install -m 600 /dev/stdin "$codex_config" <<EOF
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
-
-[mcp_servers.paddle]
-command = "$paddle_sandbox"
-env_vars = ["PADDLE_SANDBOX_API_KEY"]
-
-[mcp_servers.paddle-prod]
-command = "$paddle_prod"
-env_vars = ["PADDLE_PROD_API_KEY"]
 EOF
     ok "created ~/.codex/config.toml."
   fi
@@ -476,44 +447,10 @@ image_generation = false
 apps = false
 EOF
 
-  ok "ensured Codex CLI config, Paddle MCP servers, and Fugu/Dakodeon profiles."
+  ok "ensured Codex CLI config and Fugu/Dakodeon profiles."
 }
 
-step_claude_mcp_servers() {
-  step "Claude MCP servers"
-  local paddle_sandbox="${HOME}/.local/bin/paddle-sandbox"
-  local paddle_prod="${HOME}/.local/bin/paddle-prod"
-  export PATH="${HOME}/.local/bin:${PNPM_HOME:-$HOME/Library/pnpm}/bin:$PATH"
 
-  if ! command -v claude >/dev/null 2>&1; then
-    warn "claude CLI not on PATH; skipping Paddle MCP registration."
-    return
-  fi
-  if [[ ! -x "$paddle_sandbox" || ! -x "$paddle_prod" ]]; then
-    warn "Paddle wrapper scripts are missing; skipping Claude MCP registration."
-    return
-  fi
-  if ! command -v paddle >/dev/null 2>&1; then
-    warn "Paddle MCP package not on PATH; skipping Claude MCP registration."
-    return
-  fi
-
-  if claude mcp list 2>/dev/null | grep -q '^paddle:'; then
-    ok "paddle already registered with Claude."
-  elif claude mcp add --scope user paddle -- "$paddle_sandbox"; then
-    ok "registered paddle with Claude."
-  else
-    warn "couldn't register paddle with Claude."
-  fi
-
-  if claude mcp list 2>/dev/null | grep -q '^paddle-prod:'; then
-    ok "paddle-prod already registered with Claude."
-  elif claude mcp add --scope user paddle-prod -- "$paddle_prod"; then
-    ok "registered paddle-prod with Claude."
-  else
-    warn "couldn't register paddle-prod with Claude."
-  fi
-}
 
 step_local_overrides() {
   step "Local override files"
@@ -560,7 +497,7 @@ step_secrets_from_1password() {
   if ! op item get "$OP_ENV_ITEM" --format=json >/dev/null 2>&1; then
     warn "1Password item '$OP_ENV_ITEM' not found."
     printf "    Create a Secure Note named '%s' with each secret as a concealed field\n" "$OP_ENV_ITEM"
-    printf "    whose label is the env var name (e.g. PADDLE_SANDBOX_API_KEY, PADDLE_PROD_API_KEY).\n"
+    printf "    whose label is the env var name (e.g. ELEVENLABS_API_KEY, HF_TOKEN).\n"
     return
   fi
   local exports
@@ -652,7 +589,6 @@ STEPS=(
   step_ai_agent_configs
   step_secrets_from_1password
   step_claude_signin
-  step_claude_mcp_servers
 )
 STEP_TOTAL=${#STEPS[@]}
 
