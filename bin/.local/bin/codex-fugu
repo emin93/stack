@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-export CODEX_HOME="${CODEX_WRAPPER_HOME:-$HOME/.codex}"
-exec codex -p fugu "$@"

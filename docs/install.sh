@@ -15,7 +15,7 @@ REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
 REPO_DIR="${HOME}/orca/repos/${REPO_NAME}"
-STOW_PACKAGES=(git zsh claude bin codex)
+STOW_PACKAGES=(git zsh claude bin)
 PNPM_GLOBAL=(wrangler)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -39,8 +39,6 @@ STOW_TARGETS=(
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
   "${HOME}/.claude/settings.json"
-  "${HOME}/.codex/fugu.json"
-  "${HOME}/.codex/dakodeon.json"
 )
 
 # ---- helpers ----------------------------------------------------------------
@@ -59,42 +57,6 @@ step()   { STEP_NUM=$((STEP_NUM + 1)); printf "\n%s==>%s %s[%d/%d]%s %s\n" "$C_B
 ok()     { printf "    %s✓%s %s\n" "$C_GREEN" "$C_RESET" "$*"; }
 warn()   { printf "    %s!%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 die()    { printf "%s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; exit 1; }
-
-write_managed_block() {
-  local file="$1"
-  local marker="$2"
-  local body="$3"
-  local begin="# >>> ${marker} >>>"
-  local end="# <<< ${marker} <<<"
-
-  mkdir -p "$(dirname "$file")"
-  touch "$file"
-  chmod 600 "$file" 2>/dev/null || true
-  MANAGED_FILE="$file" \
-  MANAGED_BEGIN="$begin" \
-  MANAGED_END="$end" \
-  MANAGED_BODY="$body" \
-  python3 - <<'PY'
-import os
-import pathlib
-import re
-
-path = pathlib.Path(os.environ["MANAGED_FILE"])
-begin = os.environ["MANAGED_BEGIN"]
-end = os.environ["MANAGED_END"]
-body = os.environ["MANAGED_BODY"].rstrip()
-block = f"{begin}\n{body}\n{end}\n"
-content = path.read_text() if path.exists() else ""
-pattern = re.compile(re.escape(begin) + r"[\s\S]*?" + re.escape(end) + r"\n?")
-if pattern.search(content):
-    content = pattern.sub(block, content)
-else:
-    if content and not content.endswith("\n"):
-        content += "\n"
-    content += "\n" + block
-path.write_text(content)
-PY
-}
 
 # ---- steps ------------------------------------------------------------------
 
@@ -389,65 +351,7 @@ EOF
     ok "created ~/.codex/config.toml."
   fi
 
-  local codex_provider_block
-  codex_provider_block=$(cat <<'EOF'
-[model_providers.sakana]
-name = "Sakana API"
-base_url = "https://api.sakana.ai/v1"
-env_key = "SAKANA_API_KEY"
-wire_api = "responses"
-stream_idle_timeout_ms = 7200000
-stream_max_retries = 5
-request_max_retries = 4
-
-[model_providers.dakodeon]
-name = "Dakodeon"
-base_url = "http://127.0.0.1:8080/v1"
-stream_idle_timeout_ms = 7200000
-stream_max_retries = 5
-request_max_retries = 4
-EOF
-)
-  write_managed_block "$codex_config" "stack:codex-model-providers" "$codex_provider_block"
-
-  install -m 600 /dev/stdin "${HOME}/.codex/fugu.config.toml" <<EOF
-model = "fugu"
-model_reasoning_effort = "high"
-plan_mode_reasoning_effort = "high"
-model_provider = "sakana"
-model_catalog_json = "${HOME}/.codex/fugu.json"
-
-[features]
-image_generation = false
-apps = false
-EOF
-
-  install -m 600 /dev/stdin "${HOME}/.codex/fugu-ultra.config.toml" <<EOF
-model = "fugu-ultra"
-model_reasoning_effort = "high"
-plan_mode_reasoning_effort = "high"
-model_provider = "sakana"
-model_catalog_json = "${HOME}/.codex/fugu.json"
-
-[features]
-image_generation = false
-apps = false
-EOF
-
-  install -m 600 /dev/stdin "${HOME}/.codex/dakodeon.config.toml" <<EOF
-model = "ornith-1.0-35b"
-model_provider = "dakodeon"
-model_context_window = 262144
-model_reasoning_effort = "medium"
-plan_mode_reasoning_effort = "medium"
-model_catalog_json = "${HOME}/.codex/dakodeon.json"
-
-[features]
-image_generation = false
-apps = false
-EOF
-
-  ok "ensured Codex CLI config and Fugu/Dakodeon profiles."
+  ok "ensured base Codex CLI config."
 }
 
 
@@ -532,32 +436,6 @@ path.write_text(content)
 PY
   ok "wrote $(grep -c '^export ' <<<"$exports") secret(s) to ~/.zshrc.local"
 
-  local sakana_key
-  sakana_key=$(op item get "$OP_ENV_ITEM" --format=json \
-    | jq -r '.fields[] | select(.label == "SAKANA_API_KEY" and .value != null) | .value' \
-    | tail -n1)
-  if [[ -n "$sakana_key" ]]; then
-    local codex_env="${HOME}/.codex/.env"
-    mkdir -p "${HOME}/.codex"
-    touch "$codex_env"
-    chmod 600 "$codex_env"
-    CODEX_ENV_FILE="$codex_env" SAKANA_API_KEY_VALUE="$sakana_key" python3 - <<'PY'
-import os
-import pathlib
-import re
-
-path = pathlib.Path(os.environ["CODEX_ENV_FILE"])
-key = os.environ["SAKANA_API_KEY_VALUE"]
-line = f"SAKANA_API_KEY={key}\n"
-content = path.read_text() if path.exists() else ""
-content = re.sub(r"^(?:export\s+)?SAKANA_API_KEY=.*\n?", "", content, flags=re.MULTILINE)
-if content and not content.endswith("\n"):
-    content += "\n"
-content += line
-path.write_text(content)
-PY
-    ok "synced SAKANA_API_KEY to ~/.codex/.env"
-  fi
 }
 
 step_summary() {
