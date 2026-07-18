@@ -1,4 +1,3 @@
-tap "stablyai/orca"
 tap "emin93/tap"
 
 # CLI tools
@@ -36,7 +35,7 @@ cask "android-studio"
 # AI
 cask "codex"
 cask "claude-code@latest"
-cask "stablyai/orca/orca"
+cask "t3-code"
 cask "emin93/tap/dakodeon"
 
 # Browser & security

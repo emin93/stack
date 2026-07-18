@@ -14,8 +14,8 @@ REPO_NAME="stack"
 REPO_OWNER="emin93"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 REPO_SSH_URL="git@github.com:${REPO_OWNER}/${REPO_NAME}.git"
-REPO_DIR="${HOME}/orca/repos/${REPO_NAME}"
-STOW_PACKAGES=(git zsh claude bin)
+REPO_DIR="${HOME}/Documents/Projects/${REPO_NAME}"
+STOW_PACKAGES=(git zsh)
 PNPM_GLOBAL=(wrangler)
 OP_ENV_ITEM="stack env"
 OP_ENV_MARKER_BEGIN="# >>> stack: 1password-managed env (do not edit) >>>"
@@ -38,7 +38,6 @@ STOW_TARGETS=(
   "${HOME}/.gitconfig"
   "${HOME}/.hushlogin"
   "${HOME}/.zshrc"
-  "${HOME}/.claude/settings.json"
 )
 
 # ---- helpers ----------------------------------------------------------------
@@ -312,9 +311,19 @@ step_stow() {
   step "Stow configs"
   for target in "${STOW_TARGETS[@]}"; do
     if [[ -L "$target" ]]; then
-      local link_target
+      local link_target link_dir resolved
       link_target=$(readlink "$target")
-      if [[ "$link_target" == *"repos/${REPO_NAME}/"* && "$link_target" != *"orca/repos/${REPO_NAME}/"* ]]; then
+      # stow writes links relative to the target's directory; resolve physically
+      # (via cd) so any ".." is collapsed before the prefix comparison below
+      link_dir=$(cd "$(dirname "$target")" 2>/dev/null && cd "$(dirname "$link_target")" 2>/dev/null && pwd)
+      if [[ -n "$link_dir" ]]; then
+        resolved="${link_dir}/$(basename "$link_target")"
+      else
+        # dangling link: nothing to resolve against, compare as written
+        resolved="$link_target"
+      fi
+      # any link into a stack checkout other than the current REPO_DIR is stale
+      if [[ "$resolved" == *"/${REPO_NAME}/"* && "$resolved" != "${REPO_DIR}/"* ]]; then
         rm "$target"
         warn "removed stale stow link $target -> $link_target"
         continue
@@ -329,7 +338,7 @@ step_stow() {
       warn "backed up $target -> $backup"
     fi
   done
-  mkdir -p "${HOME}/.config" "${HOME}/.claude" "${HOME}/.local/bin" "${HOME}/.codex"
+  mkdir -p "${HOME}/.config" "${HOME}/.local/bin" "${HOME}/.codex"
   stow --target="$HOME" --dir="$REPO_DIR" --restow "${STOW_PACKAGES[@]}"
   ok "stowed: ${STOW_PACKAGES[*]}"
 }
